@@ -1,7 +1,10 @@
 package com.springboot.MyTodoList.config;
 
 
-import oracle.jdbc.pool.OracleDataSource;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
+import oracle.jdbc.pool.OracleDataSource;
 ///*
 //    This class grabs the appropriate values for OracleDataSource,
 //    The method that uses env, grabs it from the environment variables set

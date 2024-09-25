@@ -24,12 +24,12 @@ public class Usuario {
     @Column (name = "TELEGRAMID")
     int telegramID;
 
-    public User() {
+    public Usuario() {
         isAdmin = false;
     }
 
-    public User(int ID, String username, String fullName, String role, boolean isAdmin) {
-        this.ID = ID;
+    public Usuario(int IDUsuario, String username, String fullName, String role, boolean isAdmin) {
+        this.IDUsuario = IDUsuario;
         this.username = username;
         this.fullName = fullName;
         this.role = role;
@@ -61,7 +61,7 @@ public class Usuario {
     }
 
     public void setID(int ID) {
-        this.IDUsario = ID;
+        this.IDUsuario = ID;
     }
 
     public void setUsername(String username) {

@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.springboot.MyTodoList.model.SprintUsuario;
 import com.springboot.MyTodoList.repository.SprintUsuarioRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 @Service
 public class SprintUsuarioService {
     @Autowired
@@ -45,10 +46,10 @@ public class SprintUsuarioService {
     public SprintUsuario updateSprintUsuario(int id, SprintUsuario sprintUsuario) {
         Optional<SprintUsuario> sprintUsuarioData = sprintUsuarioRepository.findById(id);
         if (sprintUsuarioData.isPresent()) {
-            SprintUsuario sprintUsuario = sprintUsuarioData.get();
-            sprintUsuario.setIDSPRINT(sprintUsuario.getIDSPRINT());
-            sprintUsuario.setIDUSUARIO(sprintUsuario.getIDUSUARIO());
-            return sprintUsuarioRepository.save(sprintUsuario);
+            SprintUsuario sprintUsuario2 = sprintUsuarioData.get();
+            sprintUsuario2.setIDSPRINT(sprintUsuario.getIDSPRINT());
+            sprintUsuario2.setIDUSUARIO(sprintUsuario.getIDUSUARIO());
+            return sprintUsuarioRepository.save(sprintUsuario2);
         } else {
             return null;
         }

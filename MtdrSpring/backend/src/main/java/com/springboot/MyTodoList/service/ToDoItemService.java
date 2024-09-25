@@ -1,14 +1,15 @@
 package com.springboot.MyTodoList.service;
 
-import com.springboot.MyTodoList.model.ToDoItem;
-import com.springboot.MyTodoList.repository.ToDoItemRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.springboot.MyTodoList.model.ToDoItem;
+import com.springboot.MyTodoList.repository.ToDoItemRepository;
 
 @Service
 public class ToDoItemService {
@@ -42,12 +43,12 @@ public class ToDoItemService {
     public ToDoItem updateToDoItem(int id, ToDoItem td){
         Optional<ToDoItem> toDoItemData = toDoItemRepository.findById(id);
         if(toDoItemData.isPresent()){
-            ToDoItem toDoItem = toDoItemData.get();
-            toDoItem.setID(id);
-            toDoItem.setCreation_ts(td.getCreation_ts());
-            toDoItem.setDescription(td.getDescription());
-            toDoItem.setDone(td.isDone());
-            return toDoItemRepository.save(toDoItem);
+            ToDoItem toDoItem2 = toDoItemData.get();
+            toDoItem2.setID(id);
+            toDoItem2.setCreation_ts(td.getCreation_ts());
+            toDoItem2.setDescription(td.getDescription());
+            toDoItem2.setDone(td.isDone());
+            return toDoItemRepository.save(toDoItem2);
         }else{
             return null;
         }

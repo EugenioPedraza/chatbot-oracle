@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.repository.SprintRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 @Service
 public class SprintService {
  
@@ -46,14 +46,14 @@ public class SprintService {
     public Sprint updateSprint(int id, Sprint sprint){
         Optional<Sprint> sprintData = SprintRepository.findById(id);
         if(sprintData.isPresent()){
-            Sprint sprint = sprintData.get();
-            sprint.setID(id);
-            sprint.setFechaInicio(sprint.getFechaFin());
-            sprint.setFechaFin(sprint.getFechaFin());
-            sprint.setEstadoSprint(sprint.getEstadoSprint());
-            sprint.setNombreSprint(sprint.getNombreSprint());
+            Sprint sprint2 = sprintData.get();
+            sprint2.setID(id);
+            sprint2.setFechaInicio(sprint.getFechaFin());
+            sprint2.setFechaFin(sprint.getFechaFin());
+            sprint2.setEstadoSprint(sprint.getEstadoSprint());
+            sprint2.setNombreSprint(sprint.getNombreSprint());
 
-            return SprintRepository.save(sprint);
+            return SprintRepository.save(sprint2);
         }else{
             return null;
         }

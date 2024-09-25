@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.springboot.MyTodoList.model.Usuario;
 import com.springboot.MyTodoList.repository.UsuarioRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 @Service
 public class UsuarioService {
@@ -52,11 +52,11 @@ public class UsuarioService {
     public Usuario updateUsuario(int id, Usuario usuario) {
         Optional<Usuario> usuarioData = usuarioRepository.findById(id);
         if (usuarioData.isPresent()) {
-            Usuario usuario = usuarioData.get();
-            usuario.setUsername(usuario.getUsername());
-            usuario.setFullName(usuario.getFullName());
-            usuario.setRole(usuario.getRole());
-            return usuarioRepository.save(usuario);
+            Usuario usuario2 = usuarioData.get();
+            usuario2.setUsername(usuario.getUsername());
+            usuario2.setFullName(usuario.getFullName());
+            usuario2.setRole(usuario.getRole());
+            return usuarioRepository.save(usuario2);
         } else {
             return null;
         }

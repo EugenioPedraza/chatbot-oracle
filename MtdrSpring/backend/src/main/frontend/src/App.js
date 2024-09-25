@@ -36,6 +36,10 @@ function App() {
     // In case of an error during the API call:
     const [error, setError] = useState();
 
+       // Estado para manejar la tarea en edición
+       const [editingId, setEditingId] = useState(null);
+       const [newDescription, setNewDescription] = useState('');
+
     function deleteItem(deleteId) {
       // console.log("deleteItem("+deleteId+")")
       fetch(API_LIST+"/"+deleteId, {
@@ -183,58 +187,128 @@ function App() {
         }
       );
     }
-    return (
-      <div className="App">
-        <h1>MY TODO LIST</h1>
-        <NewItem addItem={addItem} isInserting={isInserting}/>
-        { error &&
-          <p>Error: {error.message}</p>
-        }
-        { isLoading &&
-          <CircularProgress />
-        }
-        { !isLoading &&
+    // Función para manejar el inicio de la edición
+    function startEditItem(id, currentDescription) {
+      setEditingId(id);
+      setNewDescription(currentDescription);
+  }
+
+  // Función para manejar la modificación de una tarea
+  function saveEditItem(id) {
+      modifyItem(id, newDescription, false).then(
+          (result) => {
+              reloadOneIteam(id);
+              setEditingId(null); // Cerrar el modo de edición
+          },
+          (error) => { setError(error); }
+      );
+  }
+
+
+
+  return (
+    <div className="App">
+      <h1>MY TODO LIST</h1>
+      <NewItem addItem={addItem} isInserting={isInserting} />
+      {error && <p>Error: {error.message}</p>}
+      {isLoading && <CircularProgress />}
+      {!isLoading && (
         <div id="maincontent">
-        <table id="itemlistNotDone" className="itemlist">
-          <TableBody>
-          {items.map(item => (
-            !item.done && (
-            <tr key={item.id}>
-              <td className="description">{item.description}</td>
-              { /*<td>{JSON.stringify(item, null, 2) }</td>*/ }
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
-              <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
-                    Done
-                  </Button></td>
-            </tr>
-          )))}
-          </TableBody>
-        </table>
-        <h2 id="donelist">
-          Done items
-        </h2>
-        <table id="itemlistDone" className="itemlist">
-          <TableBody>
-          {items.map(item => (
-            item.done && (
-
-            <tr key={item.id}>
-              <td className="description">{item.description}</td>
-              <td className="date"><Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment></td>
-              <td><Button variant="contained" className="DoneButton" onClick={(event) => toggleDone(event, item.id, item.description, !item.done)} size="small">
-                    Undo
-                  </Button></td>
-              <td><Button startIcon={<DeleteIcon />} variant="contained" className="DeleteButton" onClick={() => deleteItem(item.id)} size="small">
-                    Delete
-                  </Button></td>
-            </tr>
-          )))}
-          </TableBody>
-        </table>
+          {/* Tabla de items que no están hechos */}
+          <table id="itemlistNotDone" className="itemlist">
+            <TableBody>
+              {items.map(item => (
+                !item.done && (
+                  <tr key={item.id}>
+                    <td className="description">
+                      {editingId === item.id ? (
+                        <input
+                          type="text"
+                          value={newDescription}
+                          onChange={(e) => setNewDescription(e.target.value)}
+                        />
+                      ) : (
+                        item.description
+                      )}
+                    </td>
+                    <td className="date">
+                      <Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment>
+                    </td>
+                    <td>
+                      {editingId === item.id ? (
+                        <Button
+                          variant="contained"
+                          onClick={() => saveEditItem(item.id)}
+                          size="small"
+                        >
+                          Save
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          onClick={() => startEditItem(item.id, item.description)}
+                          size="small"
+                        >
+                          Modify
+                        </Button>
+                      )}
+                    </td>
+                    <td>
+                      <Button
+                        variant="contained"
+                        className="DoneButton"
+                        onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}
+                        size="small"
+                      >
+                        Done
+                      </Button>
+                    </td>
+                  </tr>
+                )
+              ))}
+            </TableBody>
+          </table>
+  
+          <h2 id="donelist">Done items</h2>
+          {/* Tabla de items que están hechos */}
+          <table id="itemlistDone" className="itemlist">
+            <TableBody>
+              {items.map(item => (
+                item.done && (
+                  <tr key={item.id}>
+                    <td className="description">{item.description}</td>
+                    <td className="date">
+                      <Moment format="MMM Do hh:mm:ss">{item.createdAt}</Moment>
+                    </td>
+                    <td>
+                      <Button
+                        variant="contained"
+                        className="DoneButton"
+                        onClick={(event) => toggleDone(event, item.id, item.description, !item.done)}
+                        size="small"
+                      >
+                        Undo
+                      </Button>
+                    </td>
+                    <td>
+                      <Button
+                        startIcon={<DeleteIcon />}
+                        variant="contained"
+                        className="DeleteButton"
+                        onClick={() => deleteItem(item.id)}
+                        size="small"
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                )
+              ))}
+            </TableBody>
+          </table>
         </div>
-        }
-
-      </div>
-    );
+      )}
+    </div>
+  );
 }
 export default App;

@@ -1,6 +1,9 @@
 package com.springboot.MyTodoList.model;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames={"IDSPRINT", "IDUSUARIO "})})

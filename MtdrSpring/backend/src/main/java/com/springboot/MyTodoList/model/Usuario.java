@@ -19,7 +19,7 @@ public class Usuario {
     String fullName;
     @Column (name = "ROLEUSUARIO")
     String role;
-    @Column (name = "IS_ADMIN")
+    @Column (name = "IS ADMIN")
     boolean isAdmin;
     @Column (name = "TELEGRAMID")
     int telegramID;

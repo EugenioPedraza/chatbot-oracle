@@ -29,8 +29,8 @@ public class Sprint {
 
     }
 
-    public Sprint(int ID, String nombreSprint, Date fechaInicio, Date fechaFin, boolean estadoSprint) {
-        this.ID = ID;
+    public Sprint(int IDSprint, String nombreSprint, Date fechaInicio, Date fechaFin, boolean estadoSprint) {
+        this.IDSprint = IDSprint;
         this.nombreSprint = nombreSprint;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;

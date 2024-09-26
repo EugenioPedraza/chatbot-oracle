@@ -30,8 +30,8 @@ public class TareaController {
     @GetMapping(value = "/tareas/{id}")
     public ResponseEntity<Tarea> getTareaById(@PathVariable int id) {
         try {
-            ResponseEntity<Tarea> responseEntity = tareaService.getTareaById(id);
-            return new ResponseEntity<Tarea>(responseEntity.getBody(), HttpStatus.OK);
+            Tarea tarea = tareaService.getTareaById(id);
+            return new ResponseEntity<>(tarea, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

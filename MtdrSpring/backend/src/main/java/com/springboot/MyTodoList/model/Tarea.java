@@ -1,8 +1,6 @@
 package com.springboot.MyTodoList.model;
 
-
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,6 +12,7 @@ import javax.persistence.Table;
 @Table(name = "TAREA")
 public class Tarea {
     
+   
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int IDTarea;
@@ -47,8 +46,7 @@ public class Tarea {
         this.puntos = puntos;
     }
 
-
-    // Setters
+ // Setters
     public void setIDTarea(int IDTarea) {
         this.IDTarea = IDTarea;
     }
@@ -81,9 +79,8 @@ public class Tarea {
         this.puntos = puntos;
     }
 
-
-    // Getteras
-    public void getIDTarea() {
+ // Getters
+    public int getIDTarea() {
         return IDTarea;
     }
 
@@ -115,7 +112,7 @@ public class Tarea {
         return puntos;
     }
 
-    @Override
+  @Override
     public String toString() {
         return "Tarea{" +
                 "IDTarea=" + IDTarea +
@@ -128,7 +125,4 @@ public class Tarea {
                 ", puntos=" + puntos +
                 '}';
     }
-    
-
-
 }

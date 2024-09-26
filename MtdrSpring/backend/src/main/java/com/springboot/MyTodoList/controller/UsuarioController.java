@@ -34,13 +34,13 @@ public class UsuarioController {
 
     // Add usuario
     @PostMapping(value = "/usuarios")
-    public ResponseEntity addUsuario(@RequestBody Usuario usuario) throws Exception{
+    public ResponseEntity addUsuario(@RequestBody Usuario usuario) throws Exception {
         Usuario us = usuarioService.addUsuario(usuario);
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("location",""+us.getID());
-        responseHeaders.set("Access-Control-Expose-Headers","location");
-        return ResponseEntity.ok()
-                .headers(responseHeaders).build();
+        responseHeaders.set("location", "" + us.getIdUsuario());
+        System.out.println(us.toString());
+        responseHeaders.set("Access-Control-Expose-Headers", "location");
+        return ResponseEntity.ok().headers(responseHeaders).build();
     }
 
     // Update usuario

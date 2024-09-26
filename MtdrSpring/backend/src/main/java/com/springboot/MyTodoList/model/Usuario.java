@@ -33,7 +33,7 @@ public class Usuario {
 
     // Default constructor
     public Usuario() {
-        this.isAdmin = false;
+        
     }
 
     // Parameterized constructor

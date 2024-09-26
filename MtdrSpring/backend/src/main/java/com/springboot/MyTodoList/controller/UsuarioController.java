@@ -14,11 +14,14 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+
+    // Get all usuarios
     @GetMapping(value = "/usuarios")
     public List<Usuario> getAllUsuarios(){
-        return usuarioService.findAll();
+        return usuarioService.getAllUsuarios();
     }
 
+    // Get usuario by id
     @GetMapping(value = "/usuarios/{id}")
     public ResponseEntity<Usuario> getUsuarioById(@PathVariable int id){
         try{
@@ -29,16 +32,18 @@ public class UsuarioController {
         }
     }
 
+    // Add usuario
     @PostMapping(value = "/usuarios")
-    public ResponseEntity addUsuario(@RequestBody Usuario usuario) throws Exception{
+    public ResponseEntity addUsuario(@RequestBody Usuario usuario) throws Exception {
         Usuario us = usuarioService.addUsuario(usuario);
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("location",""+us.getID());
-        responseHeaders.set("Access-Control-Expose-Headers","location");
-        return ResponseEntity.ok()
-                .headers(responseHeaders).build();
+        responseHeaders.set("location", "" + us.getIdUsuario());
+        System.out.println(us.toString());
+        responseHeaders.set("Access-Control-Expose-Headers", "location");
+        return ResponseEntity.ok().headers(responseHeaders).build();
     }
 
+    // Update usuario
     @PutMapping(value = "/usuarios/{id}")
     public ResponseEntity updateUsuario(@RequestBody Usuario usuario, @PathVariable int id){
         try{
@@ -50,6 +55,7 @@ public class UsuarioController {
         }
     }
 
+    // Delete usuario
     @DeleteMapping(value = "/usuarios/{id}")
     public ResponseEntity<Boolean> deleteUsuario(@PathVariable("id") int id){
         Boolean flag = false;

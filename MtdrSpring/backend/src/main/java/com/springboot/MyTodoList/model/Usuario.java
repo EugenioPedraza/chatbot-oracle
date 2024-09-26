@@ -10,90 +10,100 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "USUARIO")
 public class Usuario {
-    @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    int IDUsuario;
-    @Column (name = "NOMBREUSUARIO")
-    String username;
-    @Column (name = "NOMBRECOMPLETO")
-    String fullName;
-    @Column (name = "ROLEUSUARIO")
-    String role;
-    @Column (name = "IS ADMIN")
-    boolean isAdmin;
-    @Column (name = "TELEGRAMID")
-    int telegramID;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  
+    @Column(name = "IDUSUARIO")
+    private int idUsuario; 
+
+    @Column(name = "NOMBREUSUARIO")
+    private String username;
+
+    @Column(name = "NOMBRECOMPLETO")
+    private String fullName;
+
+    @Column(name = "ROLUSUARIO")
+    private String role;
+
+    @Column(name = "ISADMIN")
+    private boolean isAdmin;
+
+    @Column(name = "TELEGRAMID")
+    private String telegramID;
+
+    // Default constructor
     public Usuario() {
-        isAdmin = false;
+        
     }
 
-    public Usuario(int IDUsuario, String username, String fullName, String role, boolean isAdmin) {
-        this.IDUsuario = IDUsuario;
+    // Parameterized constructor
+    public Usuario(int idUsuario, String username, String fullName, String role, boolean isAdmin) {
+        this.idUsuario = idUsuario;
         this.username = username;
         this.fullName = fullName;
         this.role = role;
         this.isAdmin = isAdmin;
     }
 
-    public int getID() {
-        return IDUsuario;
+    // Getters and setters
+    public int getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public boolean getIsAdmin() {
-        return isAdmin;
-    }
-
-    public int getTelegramID() {
-        return telegramID;
-    }
-
-    public void setID(int ID) {
-        this.IDUsuario = ID;
-    }
-
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFullName() {
+        return fullName;
     }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
 
+    public String getRole() {
+        return role;
+    }
+
     public void setRole(String role) {
         this.role = role;
     }
 
-    public void setIsAdmin(boolean isAdmin) {
-         this.isAdmin = isAdmin;
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
-    public void setTelegramID(int telegramID) {
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+    public String getTelegramID() {
+        return telegramID;
+    }
+
+    public void setTelegramID(String telegramID) {
         this.telegramID = telegramID;
     }
 
+    // toString method
     @Override
     public String toString() {
-        return "Usario{" +
-                "IDUsuario=" + IDUsuario +
+        return "Usuario{" +
+                "idUsuario=" + idUsuario +
                 ", username='" + username + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", role='" + role + '\'' +
                 ", isAdmin=" + isAdmin +
-                ", telegramID=" + telegramID +
+                ", telegramID='" + telegramID + '\'' +
                 '}';
     }
-
 }

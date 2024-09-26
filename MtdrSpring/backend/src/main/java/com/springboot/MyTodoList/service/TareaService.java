@@ -27,6 +27,25 @@ public class TareaService {
         return tareaRepository.save(tarea);
     }
 
-  
+    public Tarea updateTarea(int id, Tarea tarea) {
+        Tarea tarea2 = tareaRepository.findById(id).get();
+        tarea2.setIDTarea(id);
+        tarea2.setDescripcionTarea(tarea.getDescripcionTarea());
+        tarea2.setEstadoTarea(tarea.getEstadoTarea());
+        tarea2.setFechaAsignacion(tarea.getFechaAsignacion());
+        tarea2.setFechaVencimiento(tarea.getFechaVencimiento());
+        tarea2.setIDSprint(tarea.getIDSprint());
+        tarea2.setIDUsuario(tarea.getIDUsuario());
+        return tareaRepository.save(tarea2);
+    }
+
+    public boolean deleteTarea(int id) {
+        try {
+            tareaRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 }

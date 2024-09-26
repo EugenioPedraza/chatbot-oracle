@@ -1,6 +1,7 @@
 package com.springboot.MyTodoList.model;
 
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,7 +19,7 @@ public class Tarea {
     int IDTarea;
     @Column(name = "IDUSUARIO")
     int IDUsuario;
-    @Column(name = "IDSprint")
+    @Column(name = "IDSPRINT")
     int IDSprint;
     @Column(name = "DESCRIPCIONTAREA")
     String descripcionTarea;

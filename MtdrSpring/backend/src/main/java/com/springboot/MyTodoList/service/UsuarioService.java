@@ -18,7 +18,7 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     // Servicio para encontar todos los usuarios
-    public List<Usuario> findAll() {
+    public List<Usuario> getAllUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios;
     }

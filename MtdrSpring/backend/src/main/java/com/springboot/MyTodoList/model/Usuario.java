@@ -12,24 +12,24 @@ import javax.persistence.Table;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IDUSUARIO")
-    int idUsuario; 
+    private int idUsuario; 
 
-    @Column(name = "NOMBREUSUARIO")
-    String username;
+    @Column(name = "NOMBREUSUARIO", unique = true)
+    private String username;
 
     @Column(name = "NOMBRECOMPLETO")
-    String fullName;
+    private String fullName;
 
     @Column(name = "ROLUSUARIO")
-    String role;
+    private String role;
 
     @Column(name = "ISADMIN")
-    boolean isAdmin;
+    private boolean isAdmin;
 
     @Column(name = "TELEGRAMID")
-    String telegramID;
+    private String telegramID;
 
     // Default constructor
     public Usuario() {

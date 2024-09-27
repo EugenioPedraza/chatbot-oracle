@@ -11,8 +11,13 @@ import org.springframework.stereotype.Service;
 import com.springboot.MyTodoList.model.Usuario;
 import com.springboot.MyTodoList.repository.UsuarioRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class UsuarioService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -35,7 +40,12 @@ public class UsuarioService {
 
     // Añadir a un usuario
     public Usuario addUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+        try {
+            return usuarioRepository.save(usuario);
+        } catch (Exception e) {
+            logger.error("Error adding usuario: ", e);
+            throw e;
+        }
     }
 
     // Borrar a un usuario
@@ -44,6 +54,7 @@ public class UsuarioService {
             usuarioRepository.deleteById(id);
             return true;
         } catch (Exception e) {
+            logger.error("Error deleting usuario: ", e);
             return false;
         }
     }
@@ -61,8 +72,4 @@ public class UsuarioService {
             return null;
         }
     }
-
-    
-
-    
 }

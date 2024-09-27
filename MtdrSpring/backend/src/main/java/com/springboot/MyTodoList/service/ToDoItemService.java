@@ -16,10 +16,14 @@ public class ToDoItemService {
 
     @Autowired
     private ToDoItemRepository toDoItemRepository;
+
+    // Servicio para encontrar todos los items
     public List<ToDoItem> findAll(){
         List<ToDoItem> todoItems = toDoItemRepository.findAll();
         return todoItems;
     }
+
+    // Encontrar un item por su ID
     public ResponseEntity<ToDoItem> getItemById(int id){
         Optional<ToDoItem> todoData = toDoItemRepository.findById(id);
         if (todoData.isPresent()){
@@ -28,10 +32,13 @@ public class ToDoItemService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    // Añadir un item
     public ToDoItem addToDoItem(ToDoItem toDoItem){
         return toDoItemRepository.save(toDoItem);
     }
 
+    // Borrar un item
     public boolean deleteToDoItem(int id){
         try{
             toDoItemRepository.deleteById(id);
@@ -40,6 +47,8 @@ public class ToDoItemService {
             return false;
         }
     }
+
+    // Actualizar un item
     public ToDoItem updateToDoItem(int id, ToDoItem td){
         Optional<ToDoItem> toDoItemData = toDoItemRepository.findById(id);
         if(toDoItemData.isPresent()){

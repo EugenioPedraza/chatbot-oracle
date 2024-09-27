@@ -10,10 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-/*
-    representation of the TODOITEM table that exists already
-    in the autonomous database
- */
+
+
 @Entity
 @Table(name = "TODOITEM")
 public class ToDoItem {

@@ -38,7 +38,6 @@ public class UsuarioController {
         Usuario us = usuarioService.addUsuario(usuario);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("location", "" + us.getIdUsuario());
-        System.out.println(us.toString());
         responseHeaders.set("Access-Control-Expose-Headers", "location");
         return ResponseEntity.ok().headers(responseHeaders).build();
     }

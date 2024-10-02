@@ -9,7 +9,7 @@ function App() {
     const [isLoading, setLoading] = useState(false);
     const [isInserting, setInserting] = useState(false);
     const [tareas, setTareas] = useState([]);
-    const [error, setError] = useState();
+    const [error, setError] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [newDescription, setNewDescription] = useState('');
 
@@ -20,7 +20,7 @@ function App() {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong ...');
+                    throw new Error('Error al cargar las tareas');
                 }
             })
             .then(
@@ -30,7 +30,7 @@ function App() {
                 },
                 (error) => {
                     setLoading(false);
-                    setError(error);
+                    setError(error.toString());
                 }
             );
     }, []);
@@ -44,16 +44,23 @@ function App() {
                 const remainingTareas = tareas.filter(tarea => tarea.idtarea !== id);
                 setTareas(remainingTareas);
             } else {
-                throw new Error('Something went wrong ...');
+                throw new Error('Error al eliminar la tarea');
             }
         })
         .catch((error) => {
-            setError(error);
+            setError(error.toString());
         });
     }
 
     function toggleEstado(id, descripcion, estado) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
         const updatedTarea = {
+            ...currentTarea,
             descripcionTarea: descripcion,
             estadoTarea: !estado
         };
@@ -69,7 +76,9 @@ function App() {
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error('Something went wrong ...');
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
             }
         })
         .then(updatedTarea => {
@@ -79,7 +88,8 @@ function App() {
             setTareas(updatedTareas);
         })
         .catch((error) => {
-            setError(error);
+            console.error('Error:', error);
+            setError(error.toString());
         });
     }
 
@@ -105,7 +115,7 @@ function App() {
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error('Something went wrong ...');
+                throw new Error('Error al añadir la tarea');
             }
         }).then(
             (result) => {
@@ -114,7 +124,7 @@ function App() {
             },
             (error) => {
                 setInserting(false);
-                setError(error);
+                setError(error.toString());
             }
         );
     }
@@ -125,9 +135,15 @@ function App() {
     }
 
     function saveEditTarea(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
         const updatedTarea = {
+            ...currentTarea,
             descripcionTarea: newDescription,
-            estadoTarea: tareas.find(t => t.idtarea === id).estadoTarea
         };
 
         fetch(`${API_LIST}/${id}`, {
@@ -141,7 +157,9 @@ function App() {
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error('Something went wrong ...');
+                return response.text().then(text => {
+                    throw new Error(`Error al guardar la tarea: ${text}`);
+                });
             }
         })
         .then(updatedTarea => {
@@ -150,9 +168,11 @@ function App() {
             );
             setTareas(updatedTareas);
             setEditingId(null);
+            setNewDescription('');
         })
         .catch((error) => {
-            setError(error);
+            console.error('Error:', error);
+            setError(error.toString());
         });
     }
 
@@ -160,7 +180,7 @@ function App() {
         <div className="App">
             <h1>MY TODO LIST</h1>
             <NewItem addItem={addTarea} isInserting={isInserting} />
-            {error && <p>Error: {error.message}</p>}
+            {error && <p style={{color: 'red'}}>Error: {error}</p>}
             {isLoading && <CircularProgress />}
             {!isLoading && (
                 <div id="maincontent">

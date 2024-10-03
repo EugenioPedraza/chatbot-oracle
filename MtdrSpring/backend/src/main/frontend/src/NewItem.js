@@ -13,14 +13,37 @@ function NewItem({ addItem, isInserting, sprints }) {
 
     function handleSubmit(e) {
         e.preventDefault();
+
+        // Validación de la descripción
         if (!newTarea.descripcionTarea.trim()) {
-            return;
+            alert("La descripción de la tarea es obligatoria");
+            return; // No permitir envío si la descripción está vacía
         }
+
+        // Validación de "Puntos"
+        if (newTarea.puntos < 0) {
+            alert("Los puntos deben ser un valor mayor o igual a 0");
+            return; // No permitir envío si los puntos son menores que 0
+        }
+
+        // Validación de la fecha de vencimiento
+        const fechaActual = new Date();
+        fechaActual.setHours(0, 0, 0, 0); // Ajustar la hora a 00:00:00 para comparar solo fechas
+
+        const fechaVencimiento = new Date(newTarea.fechaVencimiento);
+
+        // Verificar si la fecha de vencimiento es anterior a la fecha actual
+        if (fechaVencimiento < fechaActual) {
+            alert("La fecha de vencimiento debe ser posterior a la fecha actual");
+            return; // No permitir envío si la fecha es anterior a la actual
+        }
+
         const fechaVencimientoCompleta = `${newTarea.fechaVencimiento}T${newTarea.horaVencimiento}:00`;
         const tareaToSubmit = {
             ...newTarea,
             fechaVencimiento: fechaVencimientoCompleta
         };
+
         addItem(tareaToSubmit);
         setNewTarea({
             descripcionTarea: '',

@@ -10,28 +10,32 @@ function App() {
     const [isInserting, setInserting] = useState(false);
     const [tareas, setTareas] = useState([]);
     const [sprints, setSprints] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
     const [error, setError] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [newDescription, setNewDescription] = useState('');
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
 
     useEffect(() => {
-        loadTareasAndSprints();
+        loadTareasSprintsAndUsuarios();
     }, []);
 
-    function loadTareasAndSprints() {
+    function loadTareasSprintsAndUsuarios() {
         setLoading(true);
         Promise.all([
             fetch(API_LIST).then(response => response.json()),
-            fetch('/sprints').then(response => response.json())
+            fetch('/sprints').then(response => response.json()),
+            fetch('/usuarios').then(response => response.json())
         ])
-        .then(([tareasData, sprintsData]) => {
-            const tareasWithSprintNames = tareasData.map(tarea => ({
+        .then(([tareasData, sprintsData, usuariosData]) => {
+            const tareasWithDetails = tareasData.map(tarea => ({
                 ...tarea,
-                nombreSprint: sprintsData.find(sprint => sprint.id === tarea.idsprint)?.nombreSprint || 'Sprint desconocido'
+                nombreSprint: sprintsData.find(sprint => sprint.id === tarea.idsprint)?.nombreSprint || 'Sprint desconocido',
+                nombreUsuario: usuariosData.find(usuario => usuario.idUsuario === tarea.idusuario)?.username || 'Usuario desconocido'
             }));
-            setTareas(tareasWithSprintNames);
+            setTareas(tareasWithDetails);
             setSprints(sprintsData);
+            setUsuarios(usuariosData);
             setLoading(false);
         })
         .catch((error) => {
@@ -88,7 +92,7 @@ function App() {
         })
         .then(updatedTarea => {
             const updatedTareas = tareas.map(tarea => 
-                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint} : tarea
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
             );
             setTareas(updatedTareas);
         })
@@ -112,14 +116,18 @@ function App() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(tareaToAdd),
-        }).then((response) => {
+        }).then(async (response) => {
+            const text = await response.text();
+            if (!text) {
+                throw new Error('La respuesta del servidor está vacía.');
+            }
             if (response.ok) {
-                return response.text();
+                return JSON.parse(text);
             } else {
-                throw new Error('Error al añadir la tarea');
+                throw new Error(`Error al añadir la tarea: ${text}`);
             }
         }).then(() => {
-            loadTareasAndSprints(); 
+            loadTareasSprintsAndUsuarios(); 
             setInserting(false);
             setOpenNewItemDialog(false);
         }).catch((error) => {
@@ -152,18 +160,20 @@ function App() {
             },
             body: JSON.stringify(updatedTarea)
         })
-        .then(response => {
+        .then(async (response) => {
+            const text = await response.text();
+            if (!text) {
+                throw new Error('La respuesta del servidor está vacía.');
+            }
             if (response.ok) {
-                return response.json();
+                return JSON.text();
             } else {
-                return response.text().then(text => {
-                    throw new Error(`Error al guardar la tarea: ${text}`);
-                });
+                throw new Error(`Error al guardar la tarea: ${text}`);
             }
         })
         .then(updatedTarea => {
             const updatedTareas = tareas.map(tarea => 
-                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint} : tarea
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
             );
             setTareas(updatedTareas);
             setEditingId(null);
@@ -189,7 +199,7 @@ function App() {
             <Dialog open={openNewItemDialog} onClose={() => setOpenNewItemDialog(false)}>
                 <DialogTitle>Agregar Nueva Tarea</DialogTitle>
                 <DialogContent>
-                    <NewItem addItem={addTarea} isInserting={isInserting} sprints={sprints} />
+                    <NewItem addItem={addTarea} isInserting={isInserting} sprints={sprints} usuarios={usuarios} />
                 </DialogContent>
             </Dialog>
             {error && <p style={{color: 'red'}}>Error: {error}</p>}
@@ -216,6 +226,7 @@ function App() {
                                             <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment>
                                         </td>
                                         <td>{tarea.nombreSprint}</td>
+                                        <td>{tarea.nombreUsuario}</td>
                                         <td>
                                             {editingId === tarea.idtarea ? (
                                                 <Button
@@ -262,6 +273,7 @@ function App() {
                                             <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment>
                                         </td>
                                         <td>{tarea.nombreSprint}</td>
+                                        <td>{tarea.nombreUsuario}</td>
                                         <td>
                                             <Button
                                                 variant="contained"

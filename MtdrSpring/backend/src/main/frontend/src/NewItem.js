@@ -1,57 +1,41 @@
 import React, { useState } from "react";
 import { Button, TextField, Paper, Typography, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 
-function NewItem({ addItem, isInserting, sprints }) {
+function NewItem({ addItem, isInserting, sprints, usuarios }) {
     const [newTarea, setNewTarea] = useState({
         descripcionTarea: '',
         fechaVencimiento: '',
         horaVencimiento: '',
         puntos: 0,
         idsprint: '',
-        idusuario: 1
+        idusuario: ''  // Asegúrate de que idusuario esté inicializado
     });
 
     function handleSubmit(e) {
         e.preventDefault();
-
-        // Validación de la descripción
-        if (!newTarea.descripcionTarea.trim()) {
-            alert("La descripción de la tarea es obligatoria");
-            return; // No permitir envío si la descripción está vacía
+        // Asegurarse de que todos los campos obligatorios están completos
+        if (!newTarea.descripcionTarea.trim() || !newTarea.idusuario || !newTarea.idsprint) {
+            return;
         }
 
-        // Validación de "Puntos"
-        if (newTarea.puntos < 0) {
-            alert("Los puntos deben ser un valor mayor o igual a 0");
-            return; // No permitir envío si los puntos son menores que 0
-        }
-
-        // Validación de la fecha de vencimiento
-        const fechaActual = new Date();
-        fechaActual.setHours(0, 0, 0, 0); // Ajustar la hora a 00:00:00 para comparar solo fechas
-
-        const fechaVencimiento = new Date(newTarea.fechaVencimiento);
-
-        // Verificar si la fecha de vencimiento es anterior a la fecha actual
-        if (fechaVencimiento < fechaActual) {
-            alert("La fecha de vencimiento debe ser posterior a la fecha actual");
-            return; // No permitir envío si la fecha es anterior a la actual
-        }
-
+        // Preparar la fecha de vencimiento completa
         const fechaVencimientoCompleta = `${newTarea.fechaVencimiento}T${newTarea.horaVencimiento}:00`;
         const tareaToSubmit = {
             ...newTarea,
             fechaVencimiento: fechaVencimientoCompleta
         };
 
+        // Llamar a la función de agregar tarea
         addItem(tareaToSubmit);
+
+        // Resetear el formulario después de agregar la tarea
         setNewTarea({
             descripcionTarea: '',
             fechaVencimiento: '',
             horaVencimiento: '',
             puntos: 0,
             idsprint: '',
-            idusuario: 1
+            idusuario: ''  // Restablecer idusuario a un valor vacío
         });
     }
 
@@ -111,6 +95,7 @@ function NewItem({ addItem, isInserting, sprints }) {
                     onChange={handleChange}
                     margin="normal"
                 />
+                {/* Selector para Sprints */}
                 <FormControl fullWidth margin="normal">
                     <InputLabel id="sprint-select-label">Sprint</InputLabel>
                     <Select
@@ -120,6 +105,7 @@ function NewItem({ addItem, isInserting, sprints }) {
                         value={newTarea.idsprint}
                         label="Sprint"
                         onChange={handleChange}
+                        required
                     >
                         {sprints.map((sprint) => (
                             <MenuItem key={sprint.id} value={sprint.id}>
@@ -128,15 +114,25 @@ function NewItem({ addItem, isInserting, sprints }) {
                         ))}
                     </Select>
                 </FormControl>
-                <TextField
-                    fullWidth
-                    name="idusuario"
-                    label="ID Usuario"
-                    type="number"
-                    value={newTarea.idusuario}
-                    onChange={handleChange}
-                    margin="normal"
-                />
+                {/* Selector para Usuarios */}
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="usuario-select-label">Usuario</InputLabel>
+                    <Select
+                        labelId="usuario-select-label"
+                        id="usuario-select"
+                        name="idusuario"
+                        value={newTarea.idusuario}
+                        label="Usuario"
+                        onChange={handleChange}
+                        required
+                    >
+                        {usuarios.map((usuario) => (
+                            <MenuItem key={usuario.idUsuario} value={usuario.idUsuario}>
+                                {usuario.username}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
                 <Box mt={2}>
                     <Button
                         type="submit"

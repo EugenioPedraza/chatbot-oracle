@@ -9,13 +9,35 @@ function App() {
     const [isLoading, setLoading] = useState(false);
     const [isInserting, setInserting] = useState(false);
     const [tareas, setTareas] = useState([]);
+    const [sprints, setSprints] = useState([]);
     const [error, setError] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [newDescription, setNewDescription] = useState('');
 
     useEffect(() => {
-        loadTareas();
+        loadTareasAndSprints();
     }, []);
+
+    function loadTareasAndSprints() {
+        setLoading(true);
+        Promise.all([
+            fetch(API_LIST).then(response => response.json()),
+            fetch('/sprints').then(response => response.json())
+        ])
+        .then(([tareasData, sprintsData]) => {
+            const tareasWithSprintNames = tareasData.map(tarea => ({
+                ...tarea,
+                nombreSprint: sprintsData.find(sprint => sprint.id === tarea.idsprint)?.nombreSprint || 'Sprint desconocido'
+            }));
+            setTareas(tareasWithSprintNames);
+            setSprints(sprintsData);
+            setLoading(false);
+        })
+        .catch((error) => {
+            setLoading(false);
+            setError(error.toString());
+        });
+    }
 
     function deleteTarea(id) {
         fetch(`${API_LIST}/${id}`, {
@@ -65,7 +87,7 @@ function App() {
         })
         .then(updatedTarea => {
             const updatedTareas = tareas.map(tarea => 
-                tarea.idtarea === id ? updatedTarea : tarea
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint} : tarea
             );
             setTareas(updatedTareas);
         })
@@ -96,34 +118,12 @@ function App() {
                 throw new Error('Error al añadir la tarea');
             }
         }).then(() => {
-            loadTareas(); 
+            loadTareasAndSprints(); 
             setInserting(false);
         }).catch((error) => {
             setInserting(false);
             setError(error.toString());
         });
-    }
-
-    function loadTareas() {
-        setLoading(true);
-        fetch(API_LIST)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Error al cargar las tareas');
-                }
-            })
-            .then(
-                (result) => {
-                    setLoading(false);
-                    setTareas(result);
-                },
-                (error) => {
-                    setLoading(false);
-                    setError(error.toString());
-                }
-            );
     }
 
     function startEditTarea(id, currentDescription) {
@@ -161,7 +161,7 @@ function App() {
         })
         .then(updatedTarea => {
             const updatedTareas = tareas.map(tarea => 
-                tarea.idtarea === id ? updatedTarea : tarea
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint} : tarea
             );
             setTareas(updatedTareas);
             setEditingId(null);
@@ -176,7 +176,7 @@ function App() {
     return (
         <div className="App">
             <h1>MY TODO LIST</h1>
-            <NewItem addItem={addTarea} isInserting={isInserting} />
+            <NewItem addItem={addTarea} isInserting={isInserting} sprints={sprints} />
             {error && <p style={{color: 'red'}}>Error: {error}</p>}
             {isLoading && <CircularProgress />}
             {!isLoading && (
@@ -200,6 +200,7 @@ function App() {
                                         <td className="date">
                                             <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment>
                                         </td>
+                                        <td>{tarea.nombreSprint}</td>
                                         <td>
                                             {editingId === tarea.idtarea ? (
                                                 <Button
@@ -245,6 +246,7 @@ function App() {
                                         <td className="date">
                                             <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment>
                                         </td>
+                                        <td>{tarea.nombreSprint}</td>
                                         <td>
                                             <Button
                                                 variant="contained"

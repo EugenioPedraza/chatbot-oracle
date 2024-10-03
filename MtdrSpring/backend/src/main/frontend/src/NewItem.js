@@ -114,16 +114,16 @@ function NewItem({ addItem, isInserting, sprints }) {
                     onChange={handleChange}
                     margin="normal"
                 />
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    style={{ marginTop: '20px' }}
-                    disabled={isInserting}
-                >
-                    {isInserting ? 'Agregando…' : 'Agregar Tarea'}
-                </Button>
+                <Box mt={2}>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        disabled={isInserting}
+                    >
+                        {isInserting ? "Guardando..." : "Agregar Tarea"}
+                    </Button>
+                </Box>
             </Box>
         </Paper>
     );

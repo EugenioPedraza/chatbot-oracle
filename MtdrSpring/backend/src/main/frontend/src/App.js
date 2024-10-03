@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import NewItem from './NewItem';
 import API_LIST from './API';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Button, TableBody, CircularProgress } from '@mui/material';
+import { Button, TableBody, CircularProgress, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import Moment from 'react-moment';
 
 function App() {
@@ -13,6 +13,7 @@ function App() {
     const [error, setError] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [newDescription, setNewDescription] = useState('');
+    const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
 
     useEffect(() => {
         loadTareasAndSprints();
@@ -120,6 +121,7 @@ function App() {
         }).then(() => {
             loadTareasAndSprints(); 
             setInserting(false);
+            setOpenNewItemDialog(false);
         }).catch((error) => {
             setInserting(false);
             setError(error.toString());
@@ -176,7 +178,20 @@ function App() {
     return (
         <div className="App">
             <h1>MY TODO LIST</h1>
-            <NewItem addItem={addTarea} isInserting={isInserting} sprints={sprints} />
+            <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={() => setOpenNewItemDialog(true)}
+                style={{ marginBottom: '20px' }}
+            >
+                Agregar tarea
+            </Button>
+            <Dialog open={openNewItemDialog} onClose={() => setOpenNewItemDialog(false)}>
+                <DialogTitle>Agregar Nueva Tarea</DialogTitle>
+                <DialogContent>
+                    <NewItem addItem={addTarea} isInserting={isInserting} sprints={sprints} />
+                </DialogContent>
+            </Dialog>
             {error && <p style={{color: 'red'}}>Error: {error}</p>}
             {isLoading && <CircularProgress />}
             {!isLoading && (

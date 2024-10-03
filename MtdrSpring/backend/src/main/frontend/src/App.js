@@ -14,25 +14,7 @@ function App() {
     const [newDescription, setNewDescription] = useState('');
 
     useEffect(() => {
-        setLoading(true);
-        fetch(API_LIST)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Error al cargar las tareas');
-                }
-            })
-            .then(
-                (result) => {
-                    setLoading(false);
-                    setTareas(result);
-                },
-                (error) => {
-                    setLoading(false);
-                    setError(error.toString());
-                }
-            );
+        loadTareas();
     }, []);
 
     function deleteTarea(id) {
@@ -93,16 +75,12 @@ function App() {
         });
     }
 
-    function addTarea(descripcion) {
+    function addTarea(newTarea) {
         setInserting(true);
-        const newTarea = {
-            descripcionTarea: descripcion,
+        const tareaToAdd = {
+            ...newTarea,
             estadoTarea: false,
-            fechaVencimiento: new Date().toISOString(),
             fechaAsignacion: new Date().toISOString(),
-            puntos: 0,
-            idsprint: 1,
-            idusuario: 1
         };
 
         fetch(API_LIST, {
@@ -110,23 +88,42 @@ function App() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(newTarea),
+            body: JSON.stringify(tareaToAdd),
         }).then((response) => {
             if (response.ok) {
-                return response.json();
+                return response.text();
             } else {
                 throw new Error('Error al añadir la tarea');
             }
-        }).then(
-            (result) => {
-                setTareas([result, ...tareas]);
-                setInserting(false);
-            },
-            (error) => {
-                setInserting(false);
-                setError(error.toString());
-            }
-        );
+        }).then(() => {
+            loadTareas(); 
+            setInserting(false);
+        }).catch((error) => {
+            setInserting(false);
+            setError(error.toString());
+        });
+    }
+
+    function loadTareas() {
+        setLoading(true);
+        fetch(API_LIST)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error al cargar las tareas');
+                }
+            })
+            .then(
+                (result) => {
+                    setLoading(false);
+                    setTareas(result);
+                },
+                (error) => {
+                    setLoading(false);
+                    setError(error.toString());
+                }
+            );
     }
 
     function startEditTarea(id, currentDescription) {

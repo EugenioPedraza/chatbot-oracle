@@ -1,63 +1,123 @@
-/*
-## MyToDoReact version 1.0.
-##
-## Copyright (c) 2022 Oracle, Inc.
-## Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl/
-*/
-/*
- * Component that supports creating a new todo item.
- * @author  jean.de.lavarene@oracle.com
- */
-
 import React, { useState } from "react";
-import Button from '@mui/material/Button';
-
+import { Button, TextField, Paper, Typography, Box } from '@mui/material';
 
 function NewItem(props) {
-  const [item, setItem] = useState('');
+  const [newTarea, setNewTarea] = useState({
+    descripcionTarea: '',
+    fechaVencimiento: '',
+    horaVencimiento: '',
+    puntos: 0,
+    idsprint: 1,
+    idusuario: 1
+  });
+
   function handleSubmit(e) {
-    // console.log("NewItem.handleSubmit("+e+")");
-    if (!item.trim()) {
+    e.preventDefault();
+    if (!newTarea.descripcionTarea.trim()) {
       return;
     }
-    // addItem makes the REST API call:
-    props.addItem(item);
-    setItem("");
-    e.preventDefault();
+    const fechaVencimientoCompleta = `${newTarea.fechaVencimiento}T${newTarea.horaVencimiento}:00`;
+    const tareaToSubmit = {
+      ...newTarea,
+      fechaVencimiento: fechaVencimientoCompleta
+    };
+    props.addItem(tareaToSubmit);
+    setNewTarea({
+      descripcionTarea: '',
+      fechaVencimiento: '',
+      horaVencimiento: '',
+      puntos: 0,
+      idsprint: 1,
+      idusuario: 1
+    });
   }
+
   function handleChange(e) {
-    setItem(e.target.value);
+    const { name, value } = e.target;
+    setNewTarea(prevTarea => ({
+      ...prevTarea,
+      [name]: value
+    }));
   }
+
   return (
-    <div id="newinputform">
-    <form>
-      <input
-        id="newiteminput"
-        placeholder="New item"
-        type="text"
-        autoComplete="off"
-        value={item}
-        onChange={handleChange}
-        // No need to click on the "ADD" button to add a todo item. You
-        // can simply press "Enter":
-        onKeyDown={event => {
-          if (event.key === 'Enter') {
-            handleSubmit(event);
-          }
-        }}
-      />
-      <span>&nbsp;&nbsp;</span>
-      <Button
-        className="AddButton"
-        variant="contained"
-        disabled={props.isInserting}
-        onClick={!props.isInserting ? handleSubmit : null}
-        size="small"
-      >
-        {props.isInserting ? 'Adding…' : 'Add'}
-      </Button>
-    </form>
-    </div>
+    <Paper elevation={3} style={{ padding: '20px', maxWidth: '500px', margin: '20px auto' }}>
+      <Typography variant="h5" gutterBottom>
+        Agregar Nueva Tarea
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} noValidate autoComplete="off">
+        <TextField
+          fullWidth
+          name="descripcionTarea"
+          label="Descripción de la tarea"
+          value={newTarea.descripcionTarea}
+          onChange={handleChange}
+          margin="normal"
+          required
+        />
+        <TextField
+          fullWidth
+          name="fechaVencimiento"
+          label="Fecha de vencimiento"
+          type="date"
+          value={newTarea.fechaVencimiento}
+          onChange={handleChange}
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <TextField
+          fullWidth
+          name="horaVencimiento"
+          label="Hora de vencimiento"
+          type="time"
+          value={newTarea.horaVencimiento}
+          onChange={handleChange}
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <TextField
+          fullWidth
+          name="puntos"
+          label="Puntos"
+          type="number"
+          value={newTarea.puntos}
+          onChange={handleChange}
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          name="idsprint"
+          label="ID Sprint"
+          type="number"
+          value={newTarea.idsprint}
+          onChange={handleChange}
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          name="idusuario"
+          label="ID Usuario"
+          type="number"
+          value={newTarea.idusuario}
+          onChange={handleChange}
+          margin="normal"
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          style={{ marginTop: '20px' }}
+          disabled={props.isInserting}
+        >
+          {props.isInserting ? 'Agregando…' : 'Agregar Tarea'}
+        </Button>
+      </Box>
+    </Paper>
   );
 }
 

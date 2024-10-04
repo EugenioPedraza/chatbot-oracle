@@ -116,15 +116,11 @@ function App() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(tareaToAdd),
-        }).then(async (response) => {
-            const text = await response.text();
-            if (!text) {
-                throw new Error('La respuesta del servidor está vacía.');
-            }
+        }).then((response) => {
             if (response.ok) {
-                return JSON.parse(text);
+                return response.text();
             } else {
-                throw new Error(`Error al añadir la tarea: ${text}`);
+                throw new Error('Error al añadir la tarea');
             }
         }).then(() => {
             loadTareasSprintsAndUsuarios(); 
@@ -160,15 +156,13 @@ function App() {
             },
             body: JSON.stringify(updatedTarea)
         })
-        .then(async (response) => {
-            const text = await response.text();
-            if (!text) {
-                throw new Error('La respuesta del servidor está vacía.');
-            }
+        .then((response) => {
             if (response.ok) {
-                return JSON.text();
+                return response.json();
             } else {
-                throw new Error(`Error al guardar la tarea: ${text}`);
+                return response.text().then(text => {
+                    throw new Error(`Error al guardar la tarea: ${text}`);
+                });
             }
         })
         .then(updatedTarea => {

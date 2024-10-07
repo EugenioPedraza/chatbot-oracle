@@ -49,9 +49,6 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
 
     return (
         <Paper elevation={3} style={{ padding: '20px', maxWidth: '500px', margin: '20px auto' }}>
-            <Typography variant="h5" gutterBottom>
-                Agregar Nueva Tarea
-            </Typography>
             <Box component="form" onSubmit={handleSubmit} noValidate autoComplete="off">
                 <TextField
                     fullWidth
@@ -89,7 +86,7 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
                 <TextField
                     fullWidth
                     name="puntos"
-                    label="Puntos"
+                    label="Horas"
                     type="number"
                     value={newTarea.puntos}
                     onChange={handleChange}

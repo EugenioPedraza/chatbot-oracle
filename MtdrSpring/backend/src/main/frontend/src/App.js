@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import NewItem from './NewItem';
 import API_LIST from './API';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Button, TableBody, CircularProgress, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Button, CircularProgress, Dialog, DialogTitle, DialogContent, Accordion, AccordionSummary, AccordionDetails, Typography, TextField } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Moment from 'react-moment';
 
 function App() {
@@ -200,100 +201,95 @@ function App() {
             {isLoading && <CircularProgress />}
             {!isLoading && (
                 <div id="maincontent">
-                    <table id="itemlistNotDone" className="itemlist">
-                        <TableBody>
-                            {tareas.map(tarea => (
-                                !tarea.estadoTarea && (
-                                    <tr key={tarea.idtarea}>
-                                        <td className="description">
-                                            {editingId === tarea.idtarea ? (
-                                                <input
-                                                    type="text"
-                                                    value={newDescription}
-                                                    onChange={(e) => setNewDescription(e.target.value)}
-                                                />
-                                            ) : (
-                                                tarea.descripcionTarea
-                                            )}
-                                        </td>
-                                        <td className="date">
-                                            <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment>
-                                        </td>
-                                        <td>{tarea.nombreSprint}</td>
-                                        <td>{tarea.nombreUsuario}</td>
-                                        <td>
-                                            {editingId === tarea.idtarea ? (
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => saveEditTarea(tarea.idtarea)}
-                                                    size="small"
-                                                >
-                                                    Save
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
-                                                    size="small"
-                                                >
-                                                    Modify
-                                                </Button>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <Button
-                                                variant="contained"
-                                                className="DoneButton"
-                                                onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                size="small"
-                                            >
-                                                Done
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                )
-                            ))}
-                        </TableBody>
-                    </table>
+                    <h2>Tareas Pendientes</h2>
+                    {tareas.filter(tarea => !tarea.estadoTarea).map(tarea => (
+                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c' }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                aria-controls={`panel${tarea.idtarea}-content`}
+                                id={`panel${tarea.idtarea}-header`}
+                            >
+                                {editingId === tarea.idtarea ? (
+                                    <TextField 
+                                        value={newDescription}
+                                        onChange={(e) => setNewDescription(e.target.value)}
+                                        label="Descripción"
+                                        fullWidth
+                                        InputLabelProps={{ style: { color: 'white' } }}
+                                        inputProps={{ style: { color: 'white' } }}
+                                    />
+                                ) : (
+                                    <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
+                                )}
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Typography sx={{ color: 'white' }}>
+                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                    Sprint: {tarea.nombreSprint}<br/>
+                                    Usuario: {tarea.nombreUsuario}
+                                </Typography>
+                                {editingId === tarea.idtarea ? (
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => saveEditTarea(tarea.idtarea)}
+                                        size="small"
+                                    >
+                                        Save
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
+                                        size="small"
+                                    >
+                                        Modify
+                                    </Button>
+                                )}
+                                <Button
+                                    variant="contained"
+                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                    size="small"
+                                >
+                                    Done
+                                </Button>
+                            </AccordionDetails>
+                        </Accordion>
+                    ))}
 
-                    <h2 id="donelist">Done items</h2>
-                    <table id="itemlistDone" className="itemlist">
-                        <TableBody>
-                            {tareas.map(tarea => (
-                                tarea.estadoTarea && (
-                                    <tr key={tarea.idtarea}>
-                                        <td className="description">{tarea.descripcionTarea}</td>
-                                        <td className="date">
-                                            <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment>
-                                        </td>
-                                        <td>{tarea.nombreSprint}</td>
-                                        <td>{tarea.nombreUsuario}</td>
-                                        <td>
-                                            <Button
-                                                variant="contained"
-                                                className="DoneButton"
-                                                onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                size="small"
-                                            >
-                                                Undo
-                                            </Button>
-                                        </td>
-                                        <td>
-                                            <Button
-                                                startIcon={<DeleteIcon />}
-                                                variant="contained"
-                                                className="DeleteButton"
-                                                onClick={() => deleteTarea(tarea.idtarea)}
-                                                size="small"
-                                            >
-                                                Delete
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                )
-                            ))}
-                        </TableBody>
-                    </table>
+                    <h2>Tareas Completadas</h2>
+                    {tareas.filter(tarea => tarea.estadoTarea).map(tarea => (
+                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c' }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                aria-controls={`panel${tarea.idtarea}-content`}
+                                id={`panel${tarea.idtarea}-header`}
+                            >
+                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Typography sx={{ color: 'white' }}>
+                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                    Sprint: {tarea.nombreSprint}<br/>
+                                    Usuario: {tarea.nombreUsuario}
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                    size="small"
+                                >
+                                    Undo
+                                </Button>
+                                <Button
+                                    startIcon={<DeleteIcon />}
+                                    variant="contained"
+                                    onClick={() => deleteTarea(tarea.idtarea)}
+                                    size="small"
+                                >
+                                    Delete
+                                </Button>
+                            </AccordionDetails>
+                        </Accordion>
+                    ))}
                 </div>
             )}
         </div>
@@ -301,3 +297,4 @@ function App() {
 }
 
 export default App;
+

@@ -17,6 +17,27 @@ function App() {
     const [newDescription, setNewDescription] = useState('');
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
 
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (response.ok){
+                window.location.href = '/login';
+            } else {
+                console.error('Error al cerrar sesión');
+            }
+        }             catch (error) {
+            console.error('Error al cerrar sesión:', error);
+        }
+    }
+
     useEffect(() => {
         loadTareasSprintsAndUsuarios();
     }, []);
@@ -191,6 +212,14 @@ function App() {
             >
                 Agregar tarea
             </Button>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleLogout}
+                style={{ marginBottom: '20px', marginLeft: '10px' }}
+            >
+                Logout
+            </Button>
             <Dialog open={openNewItemDialog} onClose={() => setOpenNewItemDialog(false)}>
                 <DialogTitle>Agregar Nueva Tarea</DialogTitle>
                 <DialogContent>
@@ -237,6 +266,7 @@ function App() {
                                         Save
                                     </Button>
                                 ) : (
+                                    <div style = {{ padding: 10}}>
                                     <Button
                                         variant="contained"
                                         onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
@@ -244,14 +274,15 @@ function App() {
                                     >
                                         Modify
                                     </Button>
-                                )}
-                                <Button
-                                    variant="contained"
-                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                    size="small"
-                                >
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                        size="small"
+                                    >
                                     Done
-                                </Button>
+                                    </Button>
+                                    </div>
+                                )}
                             </AccordionDetails>
                         </Accordion>
                     ))}

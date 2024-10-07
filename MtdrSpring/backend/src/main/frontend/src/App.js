@@ -4,6 +4,9 @@ import API_LIST from './API';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button, CircularProgress, Dialog, DialogTitle, DialogContent, Accordion, AccordionSummary, AccordionDetails, Typography, TextField } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import TaskIcon from '@mui/icons-material/Task';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AddTaskIcon from '@mui/icons-material/AddTask';
 import Moment from 'react-moment';
 
 function App() {
@@ -209,6 +212,7 @@ function App() {
                 color="primary" 
                 onClick={() => setOpenNewItemDialog(true)}
                 style={{ marginBottom: '20px' }}
+                startIcon={<AddTaskIcon />}
             >
                 Agregar tarea
             </Button>
@@ -226,18 +230,20 @@ function App() {
                     <NewItem addItem={addTarea} isInserting={isInserting} sprints={sprints} usuarios={usuarios} />
                 </DialogContent>
             </Dialog>
-            {error && <p style={{color: 'red'}}>Error: {error}</p>}
+            {error && <p style={{color: 'red'}}>{error}</p>}
             {isLoading && <CircularProgress />}
             {!isLoading && (
                 <div id="maincontent">
                     <h2>Tareas Pendientes</h2>
                     {tareas.filter(tarea => !tarea.estadoTarea).map(tarea => (
-                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c' }}>
+                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c'}}>
                             <AccordionSummary
+
                                 expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
                                 aria-controls={`panel${tarea.idtarea}-content`}
                                 id={`panel${tarea.idtarea}-header`}
                             >
+                                <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
                                 {editingId === tarea.idtarea ? (
                                     <TextField 
                                         value={newDescription}
@@ -266,11 +272,12 @@ function App() {
                                         Save
                                     </Button>
                                 ) : (
-                                    <div style = {{ padding: 10}}>
+                                    <div>
                                     <Button
                                         variant="contained"
                                         onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
                                         size="small"
+                                        sx={{ marginRight: 1 , marginTop: 1}}
                                     >
                                         Modify
                                     </Button>
@@ -278,6 +285,7 @@ function App() {
                                         variant="contained"
                                         onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
                                         size="small"
+                                        sx={{ marginLeft: 1 , marginTop: 1}}
                                     >
                                     Done
                                     </Button>
@@ -295,6 +303,7 @@ function App() {
                                 aria-controls={`panel${tarea.idtarea}-content`}
                                 id={`panel${tarea.idtarea}-header`}
                             >
+                                <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
                                 <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
                             </AccordionSummary>
                             <AccordionDetails>

@@ -12,35 +12,35 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import com.springboot.MyTodoList.controller.ToDoItemBotController;
-import com.springboot.MyTodoList.service.ToDoItemService;
+import com.springboot.MyTodoList.service.TareaService;
 import com.springboot.MyTodoList.util.BotMessages;
 
 @SpringBootApplication
 public class MyTodoListApplication implements CommandLineRunner {
 
-	private static final Logger logger = LoggerFactory.getLogger(MyTodoListApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(MyTodoListApplication.class);
 
-	@Autowired
-	private ToDoItemService toDoItemService;
+    @Autowired
+    private TareaService tareaService;
 
-	@Value("${telegram.bot.token}")
-	private String telegramBotToken;
+    @Value("${telegram.bot.token}")
+    private String telegramBotToken;
 
-	@Value("${telegram.bot.name}")
-	private String botName;
+    @Value("${telegram.bot.name}")
+    private String botName;
 
-	public static void main(String[] args) {
-		SpringApplication.run(MyTodoListApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MyTodoListApplication.class, args);
+    }
 
-	@Override
-	public void run(String... args) throws Exception {
-		try {
-			TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-			telegramBotsApi.registerBot(new ToDoItemBotController(telegramBotToken, botName, toDoItemService));
-			logger.info(BotMessages.BOT_REGISTERED_STARTED.getMessage());
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void run(String... args) throws Exception {
+        try {
+            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            telegramBotsApi.registerBot(new ToDoItemBotController(telegramBotToken, botName, tareaService));
+            logger.info(BotMessages.BOT_REGISTERED_STARTED.getMessage());
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 }

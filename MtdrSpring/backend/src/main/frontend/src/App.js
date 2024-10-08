@@ -70,7 +70,7 @@ function App() {
     }
 
     function agruparPorSprint() {
-        return tareas.reduce((acc, tarea) => {
+        const sprintsAgrupados = tareas.reduce((acc, tarea) => {
             const sprint = tarea.nombreSprint;
             if (!acc[sprint]) {
                 acc[sprint] = { pendientes: [], completadas: [] };
@@ -80,6 +80,15 @@ function App() {
             } else {
                 acc[sprint].pendientes.push(tarea);
             }
+            return acc;
+        }, {});
+
+        const sprintsOrdenados = Object.keys(sprintsAgrupados).sort((a, b) => {
+            return a.localeCompare(b, undefined, { numeric: true });
+        });
+
+        return sprintsOrdenados.reduce((acc, sprint) => {
+            acc[sprint] = sprintsAgrupados[sprint];
             return acc;
         }, {});
     }
@@ -278,6 +287,7 @@ function App() {
                                         <AccordionDetails>
                                             <Typography sx={{ color: 'white' }}>
                                                 Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                                                 Sprint: {tarea.nombreSprint}<br/>
                                                 Usuario: {tarea.nombreUsuario}
                                             </Typography>
@@ -334,6 +344,7 @@ function App() {
                                             <AccordionDetails>
                                                 <Typography sx={{ color: 'white' }}>
                                                     Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                    Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                                                     Sprint: {tarea.nombreSprint}<br/>
                                                     Usuario: {tarea.nombreUsuario}
                                                 </Typography>

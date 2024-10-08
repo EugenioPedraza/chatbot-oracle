@@ -13,7 +13,6 @@ import javax.persistence.Table;
 @Table(name = "TAREA")
 public class Tarea {
     
-   
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int IDTarea;
@@ -31,9 +30,17 @@ public class Tarea {
     Date fechaAsignacion;
     @Column(name = "PUNTOS")
     int puntos;
+    @Column(name  = "FECHAINICIO")
+    Date fechaInicio;
+    @Column(name = "FECHAFIN")
+    Date fechaFin;
+    @Column(name = "HORAS")
+    Integer horas; // Changed from int to Integer
 
     public Tarea() {
-
+        this.fechaInicio = null;
+        this.fechaFin = null;
+        this.horas = 0;
     }
 
     public Tarea(int IDTarea, int IDUsuario, int IDSprint, String descripcionTarea, boolean estadoTarea, Date fechaVencimiento, Date fechaAsignacion, int puntos) {
@@ -45,9 +52,12 @@ public class Tarea {
         this.fechaVencimiento = fechaVencimiento;
         this.fechaAsignacion = fechaAsignacion;
         this.puntos = puntos;
+        this.fechaInicio = null;
+        this.fechaFin = null;
+        this.horas = 0;
     }
 
- // Setters
+    // Setters
     public void setIDTarea(int IDTarea) {
         this.IDTarea = IDTarea;
     }
@@ -80,7 +90,19 @@ public class Tarea {
         this.puntos = puntos;
     }
 
- // Getters
+    public void setFechaInicio(Date fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public void setFechaFin(Date fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public void setHoras(Integer horas) {
+        this.horas = horas;
+    }
+
+    // Getters
     public int getIDTarea() {
         return IDTarea;
     }
@@ -113,7 +135,19 @@ public class Tarea {
         return puntos;
     }
 
-  @Override
+    public Date getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public Date getFechaFin() {
+        return fechaFin;
+    }
+
+    public Integer getHoras() {
+        return horas != null ? horas : 0; // Default to 0 if null
+    }
+
+    @Override
     public String toString() {
         return "Tarea{" +
                 "IDTarea=" + IDTarea +
@@ -121,9 +155,12 @@ public class Tarea {
                 ", IDSprint=" + IDSprint +
                 ", descripcionTarea='" + descripcionTarea + '\'' +
                 ", estadoTarea=" + estadoTarea +
-                ", fechaVencimiento=" + fechaVencimiento +
-                ", fechaAsignacion=" + fechaAsignacion +
+                ", fechaVencimiento=" + (fechaVencimiento != null ? fechaVencimiento : "undefined") +
+                ", fechaAsignacion=" + (fechaAsignacion != null ? fechaAsignacion : "undefined") +
                 ", puntos=" + puntos +
+                ", fechaInicio=" + (fechaInicio != null ? fechaInicio : "undefined") +
+                ", fechaFin=" + (fechaFin != null ? fechaFin : "undefined") +
+                ", horas=" + getHoras() +
                 '}';
     }
 }

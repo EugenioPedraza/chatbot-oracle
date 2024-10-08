@@ -20,31 +20,23 @@ function App() {
     const [newDescription, setNewDescription] = useState('');
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
 
-
-    const handleLogout = async () => {
-        try {
-            const response = await fetch('/logout', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            });
-
-            if (response.ok){
-                window.location.href = '/login';
-            } else {
-                console.error('Error al cerrar sesión');
-            }
-        }             catch (error) {
-            console.error('Error al cerrar sesión:', error);
-        }
-    }
-
     useEffect(() => {
         loadTareasSprintsAndUsuarios();
     }, []);
-
+    function agruparPorSprint() {
+        return tareas.reduce((acc, tarea) => {
+            const sprint = tarea.nombreSprint;
+            if (!acc[sprint]) {
+                acc[sprint] = { pendientes: [], completadas: [] };
+            }
+            if (tarea.estadoTarea) {
+                acc[sprint].completadas.push(tarea);
+            } else {
+                acc[sprint].pendientes.push(tarea);
+            }
+            return acc;
+        }, {});
+    }
     function loadTareasSprintsAndUsuarios() {
         setLoading(true);
         Promise.all([
@@ -67,30 +59,6 @@ function App() {
             setLoading(false);
             setError(error.toString());
         });
-    }
-
-    function agruparPorSprint() {
-        const sprintsAgrupados = tareas.reduce((acc, tarea) => {
-            const sprint = tarea.nombreSprint;
-            if (!acc[sprint]) {
-                acc[sprint] = { pendientes: [], completadas: [] };
-            }
-            if (tarea.estadoTarea) {
-                acc[sprint].completadas.push(tarea);
-            } else {
-                acc[sprint].pendientes.push(tarea);
-            }
-            return acc;
-        }, {});
-
-        const sprintsOrdenados = Object.keys(sprintsAgrupados).sort((a, b) => {
-            return a.localeCompare(b, undefined, { numeric: true });
-        });
-
-        return sprintsOrdenados.reduce((acc, sprint) => {
-            acc[sprint] = sprintsAgrupados[sprint];
-            return acc;
-        }, {});
     }
 
     function deleteTarea(id) {
@@ -240,14 +208,6 @@ function App() {
             >
                 Agregar tarea
             </Button>
-            <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleLogout}
-                style={{ marginBottom: '20px', marginLeft: '10px' }}
-            >
-                Logout
-            </Button>
             <Dialog open={openNewItemDialog} onClose={() => setOpenNewItemDialog(false)}>
                 <DialogTitle>Agregar Nueva Tarea</DialogTitle>
                 <DialogContent>
@@ -264,7 +224,7 @@ function App() {
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
                                 {tareasDelSprint.pendientes.map(tarea => (
-                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#3A4F63'}}>
+                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030'}}>
                                         <AccordionSummary
                                             expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
                                             aria-controls={`panel${tarea.idtarea}-content`}
@@ -301,22 +261,32 @@ function App() {
                                                 </Button>
                                             ) : (
                                                 <div>
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
-                                                    size="small"
-                                                    sx={{ marginRight: 1 , marginTop: 1}}
-                                                >
-                                                    Modify
-                                                </Button>
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                    size="small"
-                                                    sx={{ marginLeft: 1 , marginTop: 1}}
-                                                >
-                                                Done
-                                                </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
+                                                        size="small"
+                                                        sx={{ marginRight: 1, marginTop: 1 }}
+                                                    >
+                                                        Modify
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                                        size="small"
+                                                        sx={{ marginLeft: 1, marginTop: 1 }}
+                                                    >
+                                                        Done
+                                                    </Button>
+                                                    <Button
+                                                        startIcon={<DeleteIcon />}
+                                                        variant="contained"
+                                                        color="error"
+                                                        onClick={() => deleteTarea(tarea.idtarea)}
+                                                        size="small"
+                                                        sx={{ marginLeft: 1, marginTop: 1 }}
+                                                    >
+                                                        Delete
+                                                    </Button>
                                                 </div>
                                             )}
                                         </AccordionDetails>
@@ -331,41 +301,42 @@ function App() {
                         tareasDelSprint.completadas.length > 0 && (
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
-                                    {tareasDelSprint.completadas.map(tarea => (
-                                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#3A4F63' }}>
-                                            <AccordionSummary
-                                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                                aria-controls={`panel${tarea.idtarea}-content`}
-                                                id={`panel${tarea.idtarea}-header`}
+                                {tareasDelSprint.completadas.map(tarea => (
+                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030' }}>
+                                        <AccordionSummary
+                                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                            aria-controls={`panel${tarea.idtarea}-content`}
+                                            id={`panel${tarea.idtarea}-header`}
+                                        >
+                                            <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
+                                            <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <Typography sx={{ color: 'white' }}>
+                                                Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
+                                                Sprint: {tarea.nombreSprint}<br/>
+                                                Usuario: {tarea.nombreUsuario}
+                                            </Typography>
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                                size="small"
                                             >
-                                                <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
-                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                            </AccordionSummary>
-                                            <AccordionDetails>
-                                                <Typography sx={{ color: 'white' }}>
-                                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                                    Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
-                                                    Sprint: {tarea.nombreSprint}<br/>
-                                                    Usuario: {tarea.nombreUsuario}
-                                                </Typography>
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                    size="small"
-                                                >
-                                                    Undo
-                                                </Button>
-                                                <Button
-                                                    startIcon={<DeleteIcon />}
-                                                    variant="contained"
-                                                    onClick={() => deleteTarea(tarea.idtarea)}
-                                                    size="small"
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </AccordionDetails>
-                                        </Accordion>
-                                    ))}
+                                                Undo
+                                            </Button>
+                                            <Button
+                                                startIcon={<DeleteIcon />}
+                                                variant="contained"
+                                                color="error"
+                                                onClick={() => deleteTarea(tarea.idtarea)}
+                                                size="small"
+                                            >
+                                                Delete
+                                            </Button>
+                                        </AccordionDetails>
+                                    </Accordion>
+                                ))}
                             </div>
                         )
                     ))}
@@ -376,4 +347,3 @@ function App() {
 }
 
 export default App;
-

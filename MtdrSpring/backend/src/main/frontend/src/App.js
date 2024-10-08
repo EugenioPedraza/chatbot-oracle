@@ -69,6 +69,21 @@ function App() {
         });
     }
 
+    function agruparPorSprint() {
+        return tareas.reduce((acc, tarea) => {
+            const sprint = tarea.nombreSprint;
+            if (!acc[sprint]) {
+                acc[sprint] = { pendientes: [], completadas: [] };
+            }
+            if (tarea.estadoTarea) {
+                acc[sprint].completadas.push(tarea);
+            } else {
+                acc[sprint].pendientes.push(tarea);
+            }
+            return acc;
+        }, {});
+    }
+
     function deleteTarea(id) {
         fetch(`${API_LIST}/${id}`, {
             method: 'DELETE',
@@ -235,100 +250,113 @@ function App() {
             {!isLoading && (
                 <div id="maincontent">
                     <h2>Tareas Pendientes</h2>
-                    {tareas.filter(tarea => !tarea.estadoTarea).map(tarea => (
-                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c'}}>
-                            <AccordionSummary
-
-                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                aria-controls={`panel${tarea.idtarea}-content`}
-                                id={`panel${tarea.idtarea}-header`}
-                            >
-                                <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
-                                {editingId === tarea.idtarea ? (
-                                    <TextField 
-                                        value={newDescription}
-                                        onChange={(e) => setNewDescription(e.target.value)}
-                                        label="Descripción"
-                                        fullWidth
-                                        InputLabelProps={{ style: { color: 'white' } }}
-                                        inputProps={{ style: { color: 'white' } }}
-                                    />
-                                ) : (
-                                    <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                )}
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Typography sx={{ color: 'white' }}>
-                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                    Sprint: {tarea.nombreSprint}<br/>
-                                    Usuario: {tarea.nombreUsuario}
-                                </Typography>
-                                {editingId === tarea.idtarea ? (
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => saveEditTarea(tarea.idtarea)}
-                                        size="small"
-                                    >
-                                        Save
-                                    </Button>
-                                ) : (
-                                    <div>
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
-                                        size="small"
-                                        sx={{ marginRight: 1 , marginTop: 1}}
-                                    >
-                                        Modify
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                        size="small"
-                                        sx={{ marginLeft: 1 , marginTop: 1}}
-                                    >
-                                    Done
-                                    </Button>
-                                    </div>
-                                )}
-                            </AccordionDetails>
-                        </Accordion>
+                    {Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
+                        tareasDelSprint.pendientes.length > 0 && (
+                            <div key={nombreSprint}>
+                                <h3>{nombreSprint}</h3>
+                                {tareasDelSprint.pendientes.map(tarea => (
+                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c'}}>
+                                        <AccordionSummary
+                                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                            aria-controls={`panel${tarea.idtarea}-content`}
+                                            id={`panel${tarea.idtarea}-header`}
+                                        >
+                                            <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
+                                            {editingId === tarea.idtarea ? (
+                                                <TextField 
+                                                    value={newDescription}
+                                                    onChange={(e) => setNewDescription(e.target.value)}
+                                                    label="Descripción"
+                                                    fullWidth
+                                                    InputLabelProps={{ style: { color: 'white' } }}
+                                                    inputProps={{ style: { color: 'white' } }}
+                                                />
+                                            ) : (
+                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
+                                            )}
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <Typography sx={{ color: 'white' }}>
+                                                Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                Sprint: {tarea.nombreSprint}<br/>
+                                                Usuario: {tarea.nombreUsuario}
+                                            </Typography>
+                                            {editingId === tarea.idtarea ? (
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={() => saveEditTarea(tarea.idtarea)}
+                                                    size="small"
+                                                >
+                                                    Save
+                                                </Button>
+                                            ) : (
+                                                <div>
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
+                                                    size="small"
+                                                    sx={{ marginRight: 1 , marginTop: 1}}
+                                                >
+                                                    Modify
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                                    size="small"
+                                                    sx={{ marginLeft: 1 , marginTop: 1}}
+                                                >
+                                                Done
+                                                </Button>
+                                                </div>
+                                            )}
+                                        </AccordionDetails>
+                                    </Accordion>
+                                ))}
+                            </div>
+                        )
                     ))}
 
-                    <h2>Tareas Completadas</h2>
-                    {tareas.filter(tarea => tarea.estadoTarea).map(tarea => (
-                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c' }}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                aria-controls={`panel${tarea.idtarea}-content`}
-                                id={`panel${tarea.idtarea}-header`}
-                            >
-                                <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
-                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Typography sx={{ color: 'white' }}>
-                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                    Sprint: {tarea.nombreSprint}<br/>
-                                    Usuario: {tarea.nombreUsuario}
-                                </Typography>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                    size="small"
-                                >
-                                    Undo
-                                </Button>
-                                <Button
-                                    startIcon={<DeleteIcon />}
-                                    variant="contained"
-                                    onClick={() => deleteTarea(tarea.idtarea)}
-                                    size="small"
-                                >
-                                    Delete
-                                </Button>
-                            </AccordionDetails>
-                        </Accordion>
+                    <h2 style={{ marginTop: '30px' }}>Tareas Completadas</h2>
+                    {Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
+                        tareasDelSprint.completadas.length > 0 && (
+                            <div key={nombreSprint}>
+                                <h3>{nombreSprint}</h3>
+                                    {tareasDelSprint.completadas.map(tarea => (
+                                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c' }}>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                                aria-controls={`panel${tarea.idtarea}-content`}
+                                                id={`panel${tarea.idtarea}-header`}
+                                            >
+                                                <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
+                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <Typography sx={{ color: 'white' }}>
+                                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                    Sprint: {tarea.nombreSprint}<br/>
+                                                    Usuario: {tarea.nombreUsuario}
+                                                </Typography>
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                                    size="small"
+                                                >
+                                                    Undo
+                                                </Button>
+                                                <Button
+                                                    startIcon={<DeleteIcon />}
+                                                    variant="contained"
+                                                    onClick={() => deleteTarea(tarea.idtarea)}
+                                                    size="small"
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    ))}
+                            </div>
+                        )
                     ))}
                 </div>
             )}

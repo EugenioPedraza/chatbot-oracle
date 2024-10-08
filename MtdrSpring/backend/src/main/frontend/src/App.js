@@ -264,7 +264,7 @@ function App() {
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
                                 {tareasDelSprint.pendientes.map(tarea => (
-                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c'}}>
+                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#3A4F63'}}>
                                         <AccordionSummary
                                             expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
                                             aria-controls={`panel${tarea.idtarea}-content`}
@@ -332,7 +332,7 @@ function App() {
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
                                     {tareasDelSprint.completadas.map(tarea => (
-                                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#201e1c' }}>
+                                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#3A4F63' }}>
                                             <AccordionSummary
                                                 expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
                                                 aria-controls={`panel${tarea.idtarea}-content`}

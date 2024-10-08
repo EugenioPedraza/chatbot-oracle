@@ -18,13 +18,34 @@ function App() {
     const [error, setError] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [newDescription, setNewDescription] = useState('');
+    const [newHours, setNewHours] = useState('');
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (response.ok){
+                window.location.href = '/login';
+            } else {
+                console.error('Error al cerrar sesión');
+            }
+        }             catch (error) {
+            console.error('Error al cerrar sesión:', error);
+        }
+    }
 
     useEffect(() => {
         loadTareasSprintsAndUsuarios();
     }, []);
+
     function agruparPorSprint() {
-        return tareas.reduce((acc, tarea) => {
+        const sprintsAgrupados = tareas.reduce((acc, tarea) => {
             const sprint = tarea.nombreSprint;
             if (!acc[sprint]) {
                 acc[sprint] = { pendientes: [], completadas: [] };
@@ -36,7 +57,15 @@ function App() {
             }
             return acc;
         }, {});
+        const sprintsOrdenados = Object.keys(sprintsAgrupados).sort((a, b) => {
+            return a.localeCompare(b, undefined, { numeric: true });
+        });
+        return sprintsOrdenados.reduce((acc, sprint) => {
+            acc[sprint] = sprintsAgrupados[sprint];
+            return acc;
+        }, {});
     }
+
     function loadTareasSprintsAndUsuarios() {
         setLoading(true);
         Promise.all([
@@ -149,9 +178,10 @@ function App() {
         });
     }
 
-    function startEditTarea(id, currentDescription) {
+    function startEditTarea(id, currentDescription, currentHours) {
         setEditingId(id);
         setNewDescription(currentDescription);
+        setNewHours(currentHours);
     }
 
     function saveEditTarea(id) {
@@ -164,6 +194,7 @@ function App() {
         const updatedTarea = {
             ...currentTarea,
             descripcionTarea: newDescription,
+            horas: newHours,
         };
 
         fetch(`${API_LIST}/${id}`, {
@@ -189,6 +220,7 @@ function App() {
             setTareas(updatedTareas);
             setEditingId(null);
             setNewDescription('');
+            setNewHours('');
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -207,6 +239,14 @@ function App() {
                 startIcon={<AddTaskIcon />}
             >
                 Agregar tarea
+            </Button>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleLogout}
+                style={{ marginBottom: '20px', marginLeft: '10px' }}
+            >
+                Logout
             </Button>
             <Dialog open={openNewItemDialog} onClose={() => setOpenNewItemDialog(false)}>
                 <DialogTitle>Agregar Nueva Tarea</DialogTitle>
@@ -249,21 +289,32 @@ function App() {
                                                 Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
                                                 Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                                                 Sprint: {tarea.nombreSprint}<br/>
-                                                Usuario: {tarea.nombreUsuario}
+                                                Usuario: {tarea.nombreUsuario}<br/>
                                             </Typography>
                                             {editingId === tarea.idtarea ? (
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => saveEditTarea(tarea.idtarea)}
-                                                    size="small"
-                                                >
-                                                    Save
-                                                </Button>
-                                            ) : (
-                                                <div>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <TextField
+                                                        value={newHours}
+                                                        onChange={(e) => setNewHours(e.target.value)}
+                                                        InputLabelProps={{ style: { color: 'white' } }}
+                                                        inputProps={{ style: { color: 'white' } }}
+                                                        type="number"
+                                                        sx={{ width: '70px', marginTop: 2, marginBottom: 2 }}
+                                                    />
                                                     <Button
                                                         variant="contained"
-                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea)}
+                                                        onClick={() => saveEditTarea(tarea.idtarea)}
+                                                        size="small"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <Typography sx={{ color: 'white' }}>Horas: {tarea.horas}</Typography>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas)}
                                                         size="small"
                                                         sx={{ marginRight: 1, marginTop: 1 }}
                                                     >
@@ -316,7 +367,8 @@ function App() {
                                                 Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
                                                 Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                                                 Sprint: {tarea.nombreSprint}<br/>
-                                                Usuario: {tarea.nombreUsuario}
+                                                Usuario: {tarea.nombreUsuario}<br/>
+                                                Horas: {tarea.horas}
                                             </Typography>
                                             <Button
                                                 variant="contained"

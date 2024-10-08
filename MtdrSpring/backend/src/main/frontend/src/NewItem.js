@@ -8,7 +8,8 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
         horaVencimiento: '',
         puntos: 0,
         idsprint: '',
-        idusuario: ''  // Asegúrate de que idusuario esté inicializado
+        idusuario: '',
+        horas: ''
     });
 
     function handleSubmit(e) {
@@ -35,7 +36,8 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
             horaVencimiento: '',
             puntos: 0,
             idsprint: '',
-            idusuario: ''  // Restablecer idusuario a un valor vacío
+            idusuario: '',
+            horas: ''
         });
     }
 
@@ -86,9 +88,18 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
                 <TextField
                     fullWidth
                     name="puntos"
-                    label="Horas"
+                    label="Story Points"
                     type="number"
                     value={newTarea.puntos}
+                    onChange={handleChange}
+                    margin="normal"
+                />
+                <TextField
+                    fullWidth
+                    name="horas"
+                    label="Horas"
+                    type="number"
+                    value={newTarea.horas}
                     onChange={handleChange}
                     margin="normal"
                 />

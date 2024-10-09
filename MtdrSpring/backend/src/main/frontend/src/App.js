@@ -336,7 +336,7 @@ function App() {
                                                         variant="contained"
                                                         onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
                                                         size="small"
-                                                        sx={{ marginLeft: 1, marginTop: 1 }}
+                                                        sx={{ marginTop: 1 }}
                                                     >
                                                         Done
                                                     </Button>
@@ -386,6 +386,7 @@ function App() {
                                                 variant="contained"
                                                 onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
                                                 size="small"
+                                                sx={{ marginRight: 1, marginTop: 1 }}
                                             >
                                                 Undo
                                             </Button>
@@ -395,6 +396,7 @@ function App() {
                                                 color="error"
                                                 onClick={() => deleteTarea(tarea.idtarea)}
                                                 size="small"
+                                                sx={{ marginTop: 1 }}
                                             >
                                                 Delete
                                             </Button>

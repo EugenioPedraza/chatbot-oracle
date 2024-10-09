@@ -31,18 +31,23 @@ public class Usuario {
     @Column(name = "TELEGRAMID")
     private String telegramID;
 
+    @Column(name = "CONTRASENA", nullable = true)
+    private String contrasena;
+
     // Default constructor
     public Usuario() {
         
     }
 
     // Parameterized constructor
-    public Usuario(int idUsuario, String username, String fullName, String role, boolean isAdmin) {
+    public Usuario(int idUsuario, String username, String fullName, String role, boolean isAdmin, String telegramID, String contrasena) {
         this.idUsuario = idUsuario;
         this.username = username;
         this.fullName = fullName;
         this.role = role;
         this.isAdmin = isAdmin;
+        this.telegramID = telegramID;
+        this.contrasena = contrasena;
     }
 
     // Getters and setters
@@ -70,6 +75,7 @@ public class Usuario {
         this.fullName = fullName;
     }
 
+
     public String getRole() {
         return role;
     }
@@ -94,6 +100,14 @@ public class Usuario {
         this.telegramID = telegramID;
     }
 
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
     // toString method
     @Override
     public String toString() {
@@ -104,6 +118,7 @@ public class Usuario {
                 ", role='" + role + '\'' +
                 ", isAdmin=" + isAdmin +
                 ", telegramID='" + telegramID + '\'' +
+                ", contrasena='" + (contrasena != null ? contrasena : "N/A") + '\'' +
                 '}';
     }
 }

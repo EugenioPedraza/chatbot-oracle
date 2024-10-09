@@ -67,6 +67,10 @@ public class UsuarioService {
             usuario2.setUsername(usuario.getUsername());
             usuario2.setFullName(usuario.getFullName());
             usuario2.setRole(usuario.getRole());
+            usuario2.setAdmin(usuario.isAdmin());
+            usuario2.setTelegramID(usuario.getTelegramID());
+            usuario2.setContrasena(usuario.getContrasena());
+            
             return usuarioRepository.save(usuario2);
         } else {
             return null;

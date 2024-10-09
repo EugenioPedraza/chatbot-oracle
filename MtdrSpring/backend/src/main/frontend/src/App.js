@@ -1,26 +1,30 @@
+// Importando los módulos y componentes necesarios de React y Material-UI
 import React, { useState, useEffect } from 'react';
-import NewItem from './NewItem';
-import API_LIST from './API';
-import DeleteIcon from '@mui/icons-material/Delete';
+import NewItem from './NewItem'; // Importando el componente NewItem
+import API_LIST from './API'; // Importando el endpoint de la API
+import DeleteIcon from '@mui/icons-material/Delete'; // Importando iconos de Material-UI
 import { Button, CircularProgress, Dialog, DialogTitle, DialogContent, Accordion, AccordionSummary, AccordionDetails, Typography, TextField } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TaskIcon from '@mui/icons-material/Task';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AddTaskIcon from '@mui/icons-material/AddTask';
-import Moment from 'react-moment';
+import Moment from 'react-moment'; // Importando librería para manejo de fechas
 
+// Componente principal de la aplicación
 function App() {
-    const [isLoading, setLoading] = useState(false);
-    const [isInserting, setInserting] = useState(false);
-    const [tareas, setTareas] = useState([]);
-    const [sprints, setSprints] = useState([]);
-    const [usuarios, setUsuarios] = useState([]);
-    const [error, setError] = useState(null);
-    const [editingId, setEditingId] = useState(null);
-    const [newDescription, setNewDescription] = useState('');
-    const [newHours, setNewHours] = useState('');
-    const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
+    // Definición de estados utilizando useState
+    const [isLoading, setLoading] = useState(false); // Estado para manejar si está cargando
+    const [isInserting, setInserting] = useState(false); // Estado para manejar si se está insertando un elemento
+    const [tareas, setTareas] = useState([]); // Estado para almacenar las tareas
+    const [sprints, setSprints] = useState([]); // Estado para almacenar los sprints
+    const [usuarios, setUsuarios] = useState([]); // Estado para almacenar los usuarios
+    const [error, setError] = useState(null); // Estado para almacenar errores
+    const [editingId, setEditingId] = useState(null); // Estado para almacenar el ID de la tarea que se está editando
+    const [newDescription, setNewDescription] = useState(''); // Estado para la nueva descripción de la tarea
+    const [newHours, setNewHours] = useState(''); // Estado para las nuevas horas de la tarea
+    const [openNewItemDialog, setOpenNewItemDialog] = useState(false); // Estado para manejar el diálogo de agregar nueva tarea
 
+    // Función para manejar el cierre de sesión
     const handleLogout = async () => {
         try {
             const response = await fetch('/logout', {
@@ -31,34 +35,36 @@ function App() {
                 },
             });
             if (response.ok){
-                window.location.href = '/login';
+                window.location.href = '/login'; // Redirige al usuario al login si se cierra sesión correctamente
             } else {
                 console.error('Error al cerrar sesión');
             }
-        }             catch (error) {
+        } catch (error) {
             console.error('Error al cerrar sesión:', error);
         }
     }
 
+    // useEffect para cargar datos al montar el componente
     useEffect(() => {
-        loadTareasSprintsAndUsuarios();
+        loadTareasSprintsAndUsuarios(); // Llama a la función para cargar tareas, sprints y usuarios
     }, []);
 
+    // Función para agrupar tareas por sprint
     function agruparPorSprint() {
         const sprintsAgrupados = tareas.reduce((acc, tarea) => {
             const sprint = tarea.nombreSprint;
             if (!acc[sprint]) {
-                acc[sprint] = { pendientes: [], completadas: [] };
+                acc[sprint] = { pendientes: [], completadas: [] }; // Inicializa el objeto con arrays de pendientes y completadas
             }
             if (tarea.estadoTarea) {
-                acc[sprint].completadas.push(tarea);
+                acc[sprint].completadas.push(tarea); // Añade a completadas si la tarea está completada
             } else {
-                acc[sprint].pendientes.push(tarea);
+                acc[sprint].pendientes.push(tarea); // Añade a pendientes si la tarea no está completada
             }
             return acc;
         }, {});
         const sprintsOrdenados = Object.keys(sprintsAgrupados).sort((a, b) => {
-            return a.localeCompare(b, undefined, { numeric: true });
+            return a.localeCompare(b, undefined, { numeric: true }); // Ordena los sprints alfabéticamente
         });
         return sprintsOrdenados.reduce((acc, sprint) => {
             acc[sprint] = sprintsAgrupados[sprint];
@@ -66,8 +72,9 @@ function App() {
         }, {});
     }
 
+    // Función para cargar tareas, sprints y usuarios desde la API
     function loadTareasSprintsAndUsuarios() {
-        setLoading(true);
+        setLoading(true); // Establece isLoading a true mientras se cargan los datos
         Promise.all([
             fetch(API_LIST).then(response => response.json()),
             fetch('/sprints').then(response => response.json()),
@@ -79,34 +86,36 @@ function App() {
                 nombreSprint: sprintsData.find(sprint => sprint.id === tarea.idsprint)?.nombreSprint || 'Sprint desconocido',
                 nombreUsuario: usuariosData.find(usuario => usuario.idUsuario === tarea.idusuario)?.username || 'Usuario desconocido'
             }));
-            setTareas(tareasWithDetails);
-            setSprints(sprintsData);
-            setUsuarios(usuariosData);
-            setLoading(false);
+            setTareas(tareasWithDetails); // Actualiza el estado de tareas con los detalles añadidos
+            setSprints(sprintsData); // Actualiza el estado de sprints
+            setUsuarios(usuariosData); // Actualiza el estado de usuarios
+            setLoading(false); // Establece isLoading a false ya que la carga ha terminado
         })
         .catch((error) => {
             setLoading(false);
-            setError(error.toString());
+            setError(error.toString()); // Guarda el error en el estado
         });
     }
 
+    // Función para eliminar una tarea
     function deleteTarea(id) {
         fetch(`${API_LIST}/${id}`, {
             method: 'DELETE',
         })
         .then(response => {
             if (response.ok) {
-                const remainingTareas = tareas.filter(tarea => tarea.idtarea !== id);
-                setTareas(remainingTareas);
+                const remainingTareas = tareas.filter(tarea => tarea.idtarea !== id); // Filtra las tareas restantes
+                setTareas(remainingTareas); // Actualiza el estado con las tareas restantes
             } else {
                 throw new Error('Error al eliminar la tarea');
             }
         })
         .catch((error) => {
-            setError(error.toString());
+            setError(error.toString()); // Guarda el error en el estado
         });
     }
 
+    // Función para cambiar el estado de una tarea
     function toggleEstado(id, descripcion, estado) {
         const currentTarea = tareas.find(t => t.idtarea === id);
         if (!currentTarea) {
@@ -117,7 +126,7 @@ function App() {
         const updatedTarea = {
             ...currentTarea,
             descripcionTarea: descripcion,
-            estadoTarea: !estado
+            estadoTarea: !estado // Cambia el estado de la tarea
         };
         
         fetch(`${API_LIST}/${id}`, {
@@ -140,7 +149,7 @@ function App() {
             const updatedTareas = tareas.map(tarea => 
                 tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
             );
-            setTareas(updatedTareas);
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -148,12 +157,13 @@ function App() {
         });
     }
 
+    // Función para añadir una nueva tarea
     function addTarea(newTarea) {
-        setInserting(true);
+        setInserting(true); // Establece isInserting a true mientras se inserta
         const tareaToAdd = {
             ...newTarea,
             estadoTarea: false,
-            fechaAsignacion: new Date().toISOString(),
+            fechaAsignacion: new Date().toISOString(), // Establece la fecha de asignación a la actual
         };
 
         fetch(API_LIST, {
@@ -169,21 +179,23 @@ function App() {
                 throw new Error('Error al añadir la tarea');
             }
         }).then(() => {
-            loadTareasSprintsAndUsuarios(); 
-            setInserting(false);
-            setOpenNewItemDialog(false);
+            loadTareasSprintsAndUsuarios(); // Recarga las tareas después de añadir una nueva
+            setInserting(false); // Establece isInserting a false ya que la inserción ha terminado
+            setOpenNewItemDialog(false); // Cierra el diálogo de nueva tarea
         }).catch((error) => {
             setInserting(false);
-            setError(error.toString());
+            setError(error.toString()); // Guarda el error en el estado
         });
     }
 
+    // Función para iniciar la edición de una tarea
     function startEditTarea(id, currentDescription, currentHours) {
-        setEditingId(id);
-        setNewDescription(currentDescription);
-        setNewHours(currentHours);
+        setEditingId(id); // Establece el ID de la tarea que se está editando
+        setNewDescription(currentDescription); // Establece la nueva descripción temporalmente
+        setNewHours(currentHours); // Establece las nuevas horas temporalmente
     }
 
+    // Función para guardar los cambios de una tarea editada
     function saveEditTarea(id) {
         const currentTarea = tareas.find(t => t.idtarea === id);
         if (!currentTarea) {
@@ -217,10 +229,10 @@ function App() {
             const updatedTareas = tareas.map(tarea => 
                 tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
             );
-            setTareas(updatedTareas);
-            setEditingId(null);
-            setNewDescription('');
-            setNewHours('');
+            setTareas(updatedTareas); // Actualiza el estado con la tarea modificada
+            setEditingId(null); // Resetea el estado de edición
+            setNewDescription(''); // Limpia la descripción temporal
+            setNewHours(''); // Limpia las horas temporales
         })
         .catch((error) => {
             console.error('Error:', error);

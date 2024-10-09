@@ -4,6 +4,7 @@ import NewItem from './NewItem'; // Importando el componente NewItem
 import API_LIST from './API'; // Importando el endpoint de la API
 import DeleteIcon from '@mui/icons-material/Delete'; // Importando iconos de Material-UI
 import { Button, CircularProgress, Dialog, DialogTitle, DialogContent, Accordion, AccordionSummary, AccordionDetails, Typography, TextField } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TaskIcon from '@mui/icons-material/Task';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -23,6 +24,7 @@ function App() {
     const [newDescription, setNewDescription] = useState(''); // Estado para la nueva descripción de la tarea
     const [newHours, setNewHours] = useState(''); // Estado para las nuevas horas de la tarea
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false); // Estado para manejar el diálogo de agregar nueva tarea
+    const [newUser, setNewUser] = useState('');
 
     // Función para manejar el cierre de sesión
     const handleLogout = async () => {
@@ -189,10 +191,11 @@ function App() {
     }
 
     // Función para iniciar la edición de una tarea
-    function startEditTarea(id, currentDescription, currentHours) {
+    function startEditTarea(id, currentDescription, currentHours, currentUser) {
         setEditingId(id); // Establece el ID de la tarea que se está editando
         setNewDescription(currentDescription); // Establece la nueva descripción temporalmente
         setNewHours(currentHours); // Establece las nuevas horas temporalmente
+        setNewUser(currentUser);
     }
 
     // Función para guardar los cambios de una tarea editada
@@ -207,6 +210,7 @@ function App() {
             ...currentTarea,
             descripcionTarea: newDescription,
             horas: newHours,
+            idusuario: newUser,
         };
 
         fetch(`${API_LIST}/${id}`, {
@@ -227,12 +231,13 @@ function App() {
         })
         .then(updatedTarea => {
             const updatedTareas = tareas.map(tarea => 
-                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: usuarios.find((u) => u.idUsuario === newUser).username} : tarea
             );
             setTareas(updatedTareas); // Actualiza el estado con la tarea modificada
             setEditingId(null); // Resetea el estado de edición
             setNewDescription(''); // Limpia la descripción temporal
             setNewHours(''); // Limpia las horas temporales
+            setNewUser('');
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -291,6 +296,19 @@ function App() {
                                                     fullWidth
                                                     InputLabelProps={{ style: { color: 'white' } }}
                                                     inputProps={{ style: { color: 'white' } }}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            '& fieldset': {
+                                                                borderColor: 'white', // Color del borde
+                                                            },
+                                                            '&:hover fieldset': {
+                                                                borderColor: 'white', // Color del borde al pasar el mouse
+                                                            },
+                                                            '&.Mui-focused fieldset': {
+                                                                borderColor: 'white', // Color del borde al enfocar
+                                                            },
+                                                        },
+                                                    }}
                                                 />
                                             ) : (
                                                 <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
@@ -301,32 +319,80 @@ function App() {
                                                 Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
                                                 Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                                                 Sprint: {tarea.nombreSprint}<br/>
-                                                Usuario: {tarea.nombreUsuario}<br/>
                                             </Typography>
                                             {editingId === tarea.idtarea ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <TextField
-                                                        value={newHours}
-                                                        onChange={(e) => setNewHours(e.target.value)}
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        type="number"
-                                                        sx={{ width: '70px', marginTop: 2, marginBottom: 2 }}
-                                                    />
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={() => saveEditTarea(tarea.idtarea)}
-                                                        size="small"
-                                                    >
-                                                        Save
-                                                    </Button>
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Usuario:</Typography>
+                                                            <FormControl sx={{ minWidth: 300 }}>
+                                                                <Select
+                                                                    value={newUser}
+                                                                    onChange={(e) => setNewUser(e.target.value)}
+                                                                    sx={{
+                                                                        color: 'white',
+                                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                                            borderColor: 'white', // Color del borde
+                                                                        },
+                                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                                            borderColor: 'white', // Color del borde al pasar el mouse
+                                                                        },
+                                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                                            borderColor: 'white', // Color del borde al enfocar
+                                                                        },
+                                                                        '& .MuiSelect-icon': {
+                                                                            color: 'white', // Color del icono desplegable
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    {usuarios.map((usuario) => (
+                                                                        <MenuItem key={usuario.idUsuario} value={usuario.idUsuario}>
+                                                                            {usuario.username}
+                                                                        </MenuItem>
+                                                                    ))}
+                                                                </Select>
+                                                            </FormControl>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Horas:</Typography>
+                                                            <TextField
+                                                                value={newHours}
+                                                                onChange={(e) => setNewHours(e.target.value)}
+                                                                InputLabelProps={{ style: { color: 'white' } }}
+                                                                inputProps={{ style: { color: 'white' } }}
+                                                                type="number"
+                                                                sx={{
+                                                                    width: '70px',
+                                                                    marginTop: 2,
+                                                                    marginBottom: 2,
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        '& fieldset': {
+                                                                            borderColor: 'white', // Color del borde
+                                                                        },
+                                                                        '&:hover fieldset': {
+                                                                            borderColor: 'white', // Color del borde al pasar el mouse
+                                                                        },
+                                                                        '&.Mui-focused fieldset': {
+                                                                            borderColor: 'white', // Color del borde al enfocar
+                                                                        },
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <Button
+                                                            variant="contained"
+                                                            onClick={() => saveEditTarea(tarea.idtarea)}
+                                                            size="small"
+                                                        >
+                                                            Save
+                                                        </Button>
                                                 </div>
                                             ) : (
                                                 <div>
+                                                    <Typography sx={{ color: 'white' }}>Usuario: {tarea.nombreUsuario}<br/></Typography>
                                                     <Typography sx={{ color: 'white' }}>Horas: {tarea.horas}</Typography>
                                                     <Button
                                                         variant="contained"
-                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas)}
+                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario)}
                                                         size="small"
                                                         sx={{ marginRight: 1, marginTop: 1 }}
                                                     >

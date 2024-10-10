@@ -25,6 +25,7 @@ function App() {
     const [newHours, setNewHours] = useState(''); // Estado para las nuevas horas de la tarea
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false); // Estado para manejar el diálogo de agregar nueva tarea
     const [newUser, setNewUser] = useState('');
+    const [newPoints, setNewPoints] = useState('');
 
     // Función para manejar el cierre de sesión
     const handleLogout = async () => {
@@ -191,11 +192,12 @@ function App() {
     }
 
     // Función para iniciar la edición de una tarea
-    function startEditTarea(id, currentDescription, currentHours, currentUser) {
+    function startEditTarea(id, currentDescription, currentHours, currentUser, currentPoints) {
         setEditingId(id); // Establece el ID de la tarea que se está editando
         setNewDescription(currentDescription); // Establece la nueva descripción temporalmente
         setNewHours(currentHours); // Establece las nuevas horas temporalmente
         setNewUser(currentUser);
+        setNewPoints(currentPoints);
     }
 
     // Función para guardar los cambios de una tarea editada
@@ -211,6 +213,7 @@ function App() {
             descripcionTarea: newDescription,
             horas: newHours,
             idusuario: newUser,
+            puntos: newPoints,
         };
 
         fetch(`${API_LIST}/${id}`, {
@@ -238,6 +241,7 @@ function App() {
             setNewDescription(''); // Limpia la descripción temporal
             setNewHours(''); // Limpia las horas temporales
             setNewUser('');
+            setNewPoints('');
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -323,6 +327,32 @@ function App() {
                                             {editingId === tarea.idtarea ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
+                                                            <TextField
+                                                                value={newPoints}
+                                                                onChange={(e) => setNewPoints(e.target.value)}
+                                                                InputLabelProps={{ style: { color: 'white' } }}
+                                                                inputProps={{ style: { color: 'white' } }}
+                                                                type="number"
+                                                                sx={{
+                                                                    width: '70px',
+                                                                    marginTop: 2,
+                                                                    marginBottom: 2,
+                                                                    '& .MuiOutlinedInput-root': {
+                                                                        '& fieldset': {
+                                                                            borderColor: 'white', // Color del borde
+                                                                        },
+                                                                        '&:hover fieldset': {
+                                                                            borderColor: 'white', // Color del borde al pasar el mouse
+                                                                        },
+                                                                        '&.Mui-focused fieldset': {
+                                                                            borderColor: 'white', // Color del borde al enfocar
+                                                                        },
+                                                                    },
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
                                                             <Typography sx={{ color: 'white', marginRight: '5px' }}>Usuario:</Typography>
                                                             <FormControl sx={{ minWidth: 300 }}>
                                                                 <Select
@@ -388,11 +418,12 @@ function App() {
                                                 </div>
                                             ) : (
                                                 <div>
+                                                    <Typography sx={{ color: 'white' }}>Puntos: {tarea.puntos}<br/></Typography>
                                                     <Typography sx={{ color: 'white' }}>Usuario: {tarea.nombreUsuario}<br/></Typography>
                                                     <Typography sx={{ color: 'white' }}>Horas: {tarea.horas}</Typography>
                                                     <Button
                                                         variant="contained"
-                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario)}
+                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos)}
                                                         size="small"
                                                         sx={{ marginRight: 1, marginTop: 1 }}
                                                     >
@@ -445,6 +476,7 @@ function App() {
                                                 Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
                                                 Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                                                 Sprint: {tarea.nombreSprint}<br/>
+                                                Puntos: {tarea.puntos}<br/>
                                                 Usuario: {tarea.nombreUsuario}<br/>
                                                 Horas: {tarea.horas}
                                             </Typography>

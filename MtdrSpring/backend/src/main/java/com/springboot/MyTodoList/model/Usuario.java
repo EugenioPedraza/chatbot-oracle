@@ -28,7 +28,10 @@ public class Usuario {
     @Column(name = "ISADMIN")
     private boolean isAdmin;
 
-    @Column(name = "phone")
+    @Column(name = "CONTRASENA", nullable = true)
+    private String contrasena;
+
+    @Column(name = "TELEFONO")
     private String phone;
 
     // Default constructor
@@ -37,12 +40,14 @@ public class Usuario {
     }
 
     // Parameterized constructor
-    public Usuario(int idUsuario, String username, String fullName, String role, boolean isAdmin) {
+    public Usuario(int idUsuario, String username, String fullName, String role, boolean isAdmin, String phone, String contrasena) {
         this.idUsuario = idUsuario;
         this.username = username;
         this.fullName = fullName;
         this.role = role;
         this.isAdmin = isAdmin;
+        this.phone = phone;
+        this.contrasena = contrasena;
     }
 
     // Getters and setters
@@ -70,6 +75,7 @@ public class Usuario {
         this.fullName = fullName;
     }
 
+
     public String getRole() {
         return role;
     }
@@ -90,8 +96,16 @@ public class Usuario {
         return phone;
     }
 
-    public void getPhone(String phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
     }
 
     // toString method
@@ -103,6 +117,7 @@ public class Usuario {
                 ", fullName='" + fullName + '\'' +
                 ", role='" + role + '\'' +
                 ", isAdmin=" + isAdmin +
+                ", contrasena='" + (contrasena != null ? contrasena : "N/A") + '\'' +
                 ", phone='" + phone + '\'' +
                 '}';
     }

@@ -3,6 +3,8 @@ package com.springboot.MyTodoList.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.springboot.MyTodoList.model.Usuario;
 import com.springboot.MyTodoList.repository.UsuarioRepository;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class UsuarioService {
@@ -67,7 +66,10 @@ public class UsuarioService {
             usuario2.setUsername(usuario.getUsername());
             usuario2.setFullName(usuario.getFullName());
             usuario2.setRole(usuario.getRole());
+            usuario2.setAdmin(usuario.isAdmin());
             usuario2.setPhone(usuario.getPhone());
+            usuario2.setContrasena(usuario.getContrasena());
+            
             return usuarioRepository.save(usuario2);
         } else {
             return null;

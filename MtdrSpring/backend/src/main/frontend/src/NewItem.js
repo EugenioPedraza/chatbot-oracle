@@ -5,7 +5,6 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
     const [newTarea, setNewTarea] = useState({
         descripcionTarea: '',
         fechaVencimiento: '',
-        horaVencimiento: '',
         puntos: 0,
         idsprint: '',
         idusuario: '',
@@ -19,11 +18,12 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
             return;
         }
 
-        // Preparar la fecha de vencimiento completa
-        const fechaVencimientoCompleta = `${newTarea.fechaVencimiento}T${newTarea.horaVencimiento}:00`;
+        // Hora fija de 11:59 PM a la fecha de vencimiento
+        const fechaVencimientoConHora = `${newTarea.fechaVencimiento}T23:59:00`;
+
         const tareaToSubmit = {
             ...newTarea,
-            fechaVencimiento: fechaVencimientoCompleta
+            fechaVencimiento: fechaVencimientoConHora
         };
 
         // Llamar a la función de agregar tarea
@@ -33,7 +33,6 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
         setNewTarea({
             descripcionTarea: '',
             fechaVencimiento: '',
-            horaVencimiento: '',
             puntos: 0,
             idsprint: '',
             idusuario: '',
@@ -67,18 +66,6 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
                     label="Fecha de vencimiento"
                     type="date"
                     value={newTarea.fechaVencimiento}
-                    onChange={handleChange}
-                    margin="normal"
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
-                <TextField
-                    fullWidth
-                    name="horaVencimiento"
-                    label="Hora de vencimiento"
-                    type="time"
-                    value={newTarea.horaVencimiento}
                     onChange={handleChange}
                     margin="normal"
                     InputLabelProps={{

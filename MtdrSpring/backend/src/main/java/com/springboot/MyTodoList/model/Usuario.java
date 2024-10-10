@@ -28,8 +28,8 @@ public class Usuario {
     @Column(name = "ISADMIN")
     private boolean isAdmin;
 
-    @Column(name = "TELEGRAMID")
-    private String telegramID;
+    @Column(name = "phone")
+    private String phone;
 
     // Default constructor
     public Usuario() {
@@ -86,12 +86,12 @@ public class Usuario {
         this.isAdmin = isAdmin;
     }
 
-    public String getTelegramID() {
-        return telegramID;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setTelegramID(String telegramID) {
-        this.telegramID = telegramID;
+    public void getPhone(String phone) {
+        this.phone = phone;
     }
 
     // toString method
@@ -103,7 +103,7 @@ public class Usuario {
                 ", fullName='" + fullName + '\'' +
                 ", role='" + role + '\'' +
                 ", isAdmin=" + isAdmin +
-                ", telegramID='" + telegramID + '\'' +
+                ", phone='" + phone + '\'' +
                 '}';
     }
 }

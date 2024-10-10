@@ -40,7 +40,7 @@ public class TareaService {
             tarea2.setPuntos(tarea.getPuntos());
             tarea2.setFechaInicio(tarea.getFechaInicio());
             tarea2.setFechaFin(tarea.getFechaFin());
-            tarea2.setHoras(tarea.getHoras() != null ? tarea.getHoras() : 0); // Ensure horas is not null
+            tarea2.setHoras(tarea.getHoras() != null ? tarea.getHoras() : 0);
             return tareaRepository.save(tarea2);
         }
         return null;

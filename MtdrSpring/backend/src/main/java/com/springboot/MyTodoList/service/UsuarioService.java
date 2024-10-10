@@ -67,6 +67,7 @@ public class UsuarioService {
             usuario2.setUsername(usuario.getUsername());
             usuario2.setFullName(usuario.getFullName());
             usuario2.setRole(usuario.getRole());
+            usuario2.setPhone(usuario.getPhone());
             return usuarioRepository.save(usuario2);
         } else {
             return null;

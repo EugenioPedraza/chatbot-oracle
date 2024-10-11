@@ -13,8 +13,29 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
 
     function handleSubmit(e) {
         e.preventDefault();
-        // Asegurarse de que todos los campos obligatorios están completos
+
+        // Asegurarse de que Descripción, Usuario, y Sprint tengan datos
         if (!newTarea.descripcionTarea.trim() || !newTarea.idusuario || !newTarea.idsprint) {
+            alert("Complete los campos obligatorios (Descripción, Sprint y Usuario)");
+            return;
+        }
+
+        // FechaVencimiento mayor a la actual
+        const today = new Date().toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
+        if (newTarea.fechaVencimiento < today) {
+            alert("La fecha de vencimiento no puede estar en el pasado.");
+            return;
+        }
+
+        // Puntos no menor a cero
+        if (newTarea.puntos < 0) {
+            alert("Los Story Points no pueden ser negativos.");
+            return;
+        }
+
+        // Horas no menor a cero
+        if (newTarea.horas < 0) {
+            alert("Las Horas no pueden ser negativas.");
             return;
         }
 

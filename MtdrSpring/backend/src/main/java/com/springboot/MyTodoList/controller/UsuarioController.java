@@ -1,11 +1,17 @@
 package com.springboot.MyTodoList.controller;
 import com.springboot.MyTodoList.model.Usuario;
 import com.springboot.MyTodoList.service.UsuarioService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+
 
 import java.util.List;
 
@@ -14,6 +20,7 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
 
     // Get all usuarios
     @GetMapping(value = "/usuarios")

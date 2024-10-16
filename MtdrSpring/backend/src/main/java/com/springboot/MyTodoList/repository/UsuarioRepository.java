@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.repository;
 
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -13,5 +14,5 @@ import com.springboot.MyTodoList.model.Usuario;
 @Transactional
 @EnableTransactionManagement
 public interface UsuarioRepository extends JpaRepository<Usuario,Integer> {
-
+    Optional<Usuario> findByUsername(String username);
 }

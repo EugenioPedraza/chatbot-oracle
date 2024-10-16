@@ -7,16 +7,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 @Entity
 @Table(name = "USUARIO")
-public class Usuario {
+public class Usuario{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IDUSUARIO")
     private int idUsuario; 
 
-    @Column(name = "NOMBREUSUARIO", unique = true)
+    @Column(name = "NOMBREUSUARIO")
     private String username;
 
     @Column(name = "NOMBRECOMPLETO")
@@ -49,6 +50,9 @@ public class Usuario {
         this.phone = phone;
         this.contrasena = contrasena;
     }
+    public Usuario(String username){
+        this.username = username;
+    }
 
     // Getters and setters
     public int getIdUsuario() {
@@ -58,7 +62,7 @@ public class Usuario {
     public void setIdUsuario(int idUsuario) {
         this.idUsuario = idUsuario;
     }
-
+    
     public String getUsername() {
         return username;
     }
@@ -80,8 +84,12 @@ public class Usuario {
         return role;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setRole(boolean isAdmin) {
+        if (isAdmin) {
+            this.role = "ADMIN";
+        } else {
+            this.role = "USER";
+        }
     }
 
     public boolean isAdmin() {
@@ -100,13 +108,16 @@ public class Usuario {
         this.phone = phone;
     }
 
-    public String getContrasena() {
+    public String getPassword() {
         return contrasena;
     }
 
-    public void setContrasena(String contrasena) {
+    public void setPassword(String contrasena) {
         this.contrasena = contrasena;
     }
+
+
+
 
     // toString method
     @Override

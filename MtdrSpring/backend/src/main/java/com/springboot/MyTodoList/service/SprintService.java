@@ -52,6 +52,7 @@ public class SprintService {
             sprint2.setFechaFin(sprint.getFechaFin());
             sprint2.setEstadoSprint(sprint.getEstadoSprint());
             sprint2.setNombreSprint(sprint.getNombreSprint());
+            sprint2.setNumSprint(sprint.getNumSprint());
 
             return SprintRepository.save(sprint2);
         }else{

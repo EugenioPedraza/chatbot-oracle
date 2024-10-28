@@ -72,16 +72,9 @@ spec:
                   name: frontendadmin
                   key: password
                   optional: true
-          volumeMounts:
-            - name: creds
-              mountPath: /mtdrworkshop/creds
           ports:
             - containerPort: 8080
       restartPolicy: Always
-      volumes:
-        - name: creds
-          secret:
-            secretName: db-wallet-secret
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname

@@ -1,9 +1,9 @@
 package com.springboot.MyTodoList.controller;
 
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,12 +11,16 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -29,18 +33,15 @@ import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
 
-
+@Controller
 public class ToDoItemBotController extends TelegramLongPollingBot {
 
     private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
     private TareaService tareaService;
     private String botName;
-    private Map<Long, String> lastCommand = new HashMap<>();
-    private Map<Long, Map<String, String>> userConversationState = new HashMap<>();
-    private static final String[] TAREA_FIELDS = {"descripcion", "fechaVencimiento", "idSprint", "idUsuario"};
-    private static final int FIELD_INDEX_DESCRIPCION = 0;
 
-    public ToDoItemBotController(String botToken, String botName, TareaService tareaService) {
+    @Autowired
+    public ToDoItemBotController(@Qualifier("botToken") String botToken, @Qualifier("botName") String botName, TareaService tareaService) {
         super(botToken);
         logger.info("Bot Token: " + botToken);
         logger.info("Bot name: " + botName);
@@ -48,135 +49,113 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         this.botName = botName;
     }
 
+    @Override
+    public void onUpdateReceived(Update update) {
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String messageTextFromTelegram = update.getMessage().getText();
+            long chatId = update.getMessage().getChatId();
 
-@Override
-public void onUpdateReceived(Update update) {
-    if (update.hasMessage() && update.getMessage().hasText()) {
-        String messageTextFromTelegram = update.getMessage().getText();
-        String chatId = update.getMessage().getChatId().toString();
-        Long chatIdLong = Long.parseLong(chatId);
+            if (messageTextFromTelegram.startsWith("/delete")) {
+                handleDeleteCommand(chatId, messageTextFromTelegram);
+            } else if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
+                    || messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
+                showMainMenu(chatId);
+            } else if (messageTextFromTelegram.indexOf(BotLabels.DONE.getLabel()) != -1) {
+                markTareaAsDone(chatId, messageTextFromTelegram);
+            } else if (messageTextFromTelegram.indexOf(BotLabels.UNDO.getLabel()) != -1) {
+                undoTarea(chatId, messageTextFromTelegram);
+            } else if (messageTextFromTelegram.indexOf(BotLabels.DELETE.getLabel()) != -1) {
+                deleteTarea(chatId, messageTextFromTelegram);
+            } else if (messageTextFromTelegram.equals("Eliminar Tarea")) {
+                promptForTaskId(chatId);
+            } else if (messageTextFromTelegram.equals(BotCommands.HIDE_COMMAND.getCommand())
+                    || messageTextFromTelegram.equals(BotLabels.HIDE_MAIN_SCREEN.getLabel())) {
+                BotHelper.sendMessageToTelegram(chatId, BotMessages.BYE.getMessage(), this);
+            } else if (messageTextFromTelegram.equals(BotCommands.TODO_LIST.getCommand())
+                    || messageTextFromTelegram.equals(BotLabels.LIST_ALL_ITEMS.getLabel())
+                    || messageTextFromTelegram.equals(BotLabels.MY_TODO_LIST.getLabel())) {
+                showTareaList(chatId);
+            } else if (messageTextFromTelegram.equals(BotCommands.ADD_ITEM.getCommand())
+                    || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
+                promptForNewTarea(chatId);
+            } else {
+                addNewTarea(chatId, messageTextFromTelegram);
+            }
+        } else if (update.hasCallbackQuery()) {
+            String callData = update.getCallbackQuery().getData();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-        if (messageTextFromTelegram.startsWith("/delete")) {
-            handleDeleteCommand(chatIdLong, messageTextFromTelegram);
-        } else if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
-                || messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-            showMainMenu(chatIdLong);
-        } else if (messageTextFromTelegram.indexOf(BotLabels.DONE.getLabel()) != -1) {
-            markTareaAsDone(chatIdLong, messageTextFromTelegram);
-        } else if (messageTextFromTelegram.indexOf(BotLabels.UNDO.getLabel()) != -1) {
-            undoTarea(chatIdLong, messageTextFromTelegram);
-        } else if (messageTextFromTelegram.indexOf(BotLabels.DELETE.getLabel()) != -1) {
-            deleteTarea(chatIdLong, messageTextFromTelegram);
-        } else if (messageTextFromTelegram.equals("Eliminar Tarea")) {
-            promptForTaskId(chatIdLong);
-        } else if (userConversationState.containsKey(chatIdLong) && userConversationState.get(chatIdLong).containsKey("awaitingTaskId")) {
-            handleDeleteTaskIdInput(chatIdLong, messageTextFromTelegram);
-        } else if (messageTextFromTelegram.equals(BotCommands.HIDE_COMMAND.getCommand())
-                || messageTextFromTelegram.equals(BotLabels.HIDE_MAIN_SCREEN.getLabel())) {
-            BotHelper.sendMessageToTelegram(chatIdLong, BotMessages.BYE.getMessage(), this);
-        } else if (messageTextFromTelegram.equals(BotCommands.TODO_LIST.getCommand())
-                || messageTextFromTelegram.equals(BotLabels.LIST_ALL_ITEMS.getLabel())
-                || messageTextFromTelegram.equals(BotLabels.MY_TODO_LIST.getLabel())) {
-            showTareaList(chatIdLong);
-        } else if (messageTextFromTelegram.equals(BotCommands.ADD_ITEM.getCommand())
-                || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
-            startNewTareaConversation(chatIdLong);
-        } else if (userConversationState.containsKey(chatIdLong)) {
-            handleTareaInput(chatIdLong, messageTextFromTelegram);
-        } else {
-            BotHelper.sendMessageToTelegram(chatIdLong, 
-                "Lo siento, no entiendo ese comando. Por favor, usa el menú principal.", this);
-        }
-    } else if (update.hasCallbackQuery()) {
-        String callData = update.getCallbackQuery().getData();
-        long chatId = update.getCallbackQuery().getMessage().getChatId();
-
-        if (callData.startsWith("TASK_")) {
-            int taskId = Integer.parseInt(callData.substring(5));
-            showTaskDetails(chatId, taskId);
+            if (callData.startsWith("TASK_")) {
+                int taskId = Integer.parseInt(callData.substring(5));
+                showTaskDetails(chatId, taskId);
+            }
         }
     }
-}
-private void handleDeleteTaskIdInput(Long chatId, String messageText) {
-    try {
-        int tareaId = Integer.parseInt(messageText);
-        userConversationState.remove(chatId); // Clear the state
-        handleDeleteCommand(chatId, "/delete " + tareaId);
-    } catch (NumberFormatException e) {
-        BotHelper.sendMessageToTelegram(chatId, "ID de tarea inválido. Por favor, proporciona un número válido.", this);
-    }
-}
 
-private void promptForTaskId(Long chatId) {
-    userConversationState.put(chatId, new HashMap<>());
-    userConversationState.get(chatId).put("awaitingTaskId", "true");
-    BotHelper.sendMessageToTelegram(chatId, "Por favor, proporciona el ID de la tarea a eliminar:", this);
-}
+    private void handleDeleteCommand(long chatId, String messageText) {
+        try {
+            String[] parts = messageText.split(" ");
+            if (parts.length != 2) {
+                BotHelper.sendMessageToTelegram(chatId,
+                    "Por favor, proporciona el ID de la tarea a eliminar. Uso: /delete <ID_TAREA>", this);
+                return;
+            }
 
-private void handleDeleteCommand(Long chatId, String messageText) {
-    try {
-        String[] parts = messageText.split(" ");
-        if (parts.length != 2) {
-            BotHelper.sendMessageToTelegram(chatId, 
-                "Por favor, proporciona el ID de la tarea a eliminar. Uso: /delete <ID_TAREA>", this);
-            return;
+            int tareaId = Integer.parseInt(parts[1]);
+            boolean deleted = tareaService.deleteTarea(tareaId);
+
+            if (deleted) {
+                BotHelper.sendMessageToTelegram(chatId, "Tarea eliminada exitosamente.", this);
+            } else {
+                BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con el ID proporcionado.", this);
+            }
+        } catch (NumberFormatException e) {
+            BotHelper.sendMessageToTelegram(chatId, "ID de tarea inválido. Por favor, proporciona un número válido.", this);
+        } catch (Exception e) {
+            logger.error("Error al eliminar la tarea: " + e.getMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId,
+                "Lo siento, hubo un error al eliminar la tarea. Por favor, inténtalo de nuevo.", this);
         }
+    }
 
-        int tareaId = Integer.parseInt(parts[1]);
-        boolean deleted = tareaService.deleteTarea(tareaId);
+    private void showMainMenu(long chatId) {
+        SendMessage messageToTelegram = new SendMessage();
+        messageToTelegram.setChatId(chatId);
+        messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
 
-        if (deleted) {
-            BotHelper.sendMessageToTelegram(chatId, "Tarea eliminada exitosamente.", this);
-        } else {
-            BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con el ID proporcionado.", this);
+        // Configurar teclado personalizado
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        // Primera fila: Listar y Agregar ítems
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
+        row1.add(BotLabels.ADD_NEW_ITEM.getLabel());
+        keyboard.add(row1);
+
+        // Segunda fila: Mostrar y Ocultar pantalla principal
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+        row2.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
+        keyboard.add(row2);
+
+        // Tercera fila: Botón para eliminar tarea
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add("Eliminar Tarea");
+        keyboard.add(row3);
+
+        // Establece el teclado en el mensaje
+        keyboardMarkup.setKeyboard(keyboard);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setOneTimeKeyboard(false);
+        messageToTelegram.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(messageToTelegram);
+        } catch (TelegramApiException e) {
+            logger.error(e.getLocalizedMessage(), e);
         }
-    } catch (NumberFormatException e) {
-        BotHelper.sendMessageToTelegram(chatId, "ID de tarea inválido. Por favor, proporciona un número válido.", this);
-    } catch (Exception e) {
-        logger.error("Error al eliminar la tarea: " + e.getMessage(), e);
-        BotHelper.sendMessageToTelegram(chatId, 
-            "Lo siento, hubo un error al eliminar la tarea. Por favor, inténtalo de nuevo.", this);
     }
-}
-
- private void showMainMenu(long chatId) {
-    SendMessage messageToTelegram = new SendMessage();
-    messageToTelegram.setChatId(chatId);
-    messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
-
-    // Configurar teclado personalizado
-    ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-    List<KeyboardRow> keyboard = new ArrayList<>();
-
-    // Primera fila: Listar y Agregar ítems
-    KeyboardRow row1 = new KeyboardRow();
-    row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
-    row1.add(BotLabels.ADD_NEW_ITEM.getLabel());
-    keyboard.add(row1);
-
-    // Segunda fila: Mostrar y Ocultar pantalla principal
-    KeyboardRow row2 = new KeyboardRow();
-    row2.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-    row2.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
-    keyboard.add(row2);
-
-    // Tercera fila: Botón para eliminar tarea
-    KeyboardRow row3 = new KeyboardRow();
-    row3.add("Eliminar Tarea");  // Botón para eliminar tarea
-    keyboard.add(row3);
-
-    // Establece el teclado en el mensaje
-    keyboardMarkup.setKeyboard(keyboard);
-    keyboardMarkup.setResizeKeyboard(true); // Ajusta el teclado al tamaño
-    keyboardMarkup.setOneTimeKeyboard(false); // Teclado persistente
-    messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-    try {
-        execute(messageToTelegram);
-    } catch (TelegramApiException e) {
-        logger.error(e.getLocalizedMessage(), e);
-    }
-}
 
     private void markTareaAsDone(long chatId, String messageText) {
         String done = messageText.substring(0, messageText.indexOf(BotLabels.DASH.getLabel()));
@@ -217,76 +196,65 @@ private void handleDeleteCommand(Long chatId, String messageText) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-    
+
     private void showTareaList(long chatId) {
-    List<Tarea> allTareas = tareaService.findAll();       
-    List<Tarea> pendingTareas = allTareas.stream()
-        .filter(tarea -> !tarea.getEstadoTarea())
-        .collect(Collectors.toList());
+        List<Tarea> allTareas = tareaService.findAll();       
+        List<Tarea> pendingTareas = allTareas.stream()
+            .filter(tarea -> !tarea.getEstadoTarea())
+            .collect(Collectors.toList());
 
-    Map<Integer, List<Tarea>> completedTareasBySprint = allTareas.stream()
-        .filter(Tarea::getEstadoTarea)
-        .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
+        Map<Integer, List<Tarea>> completedTareasBySprint = allTareas.stream()
+            .filter(Tarea::getEstadoTarea)
+            .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
-    InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-    List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-    addDarkHeaderRow(rowsInline, "Tareas Pendientes");
+        addDarkHeaderRow(rowsInline, "Tareas Pendientes");
 
-    for (Tarea tarea : pendingTareas) {
-        addTaskButton(rowsInline, tarea);
-    }
-
-    addDarkHeaderRow(rowsInline, "Tareas Completadas");
-
-    for (Map.Entry<Integer, List<Tarea>> entry : completedTareasBySprint.entrySet()) {
-        addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
-        for (Tarea tarea : entry.getValue()) {
+        for (Tarea tarea : pendingTareas) {
             addTaskButton(rowsInline, tarea);
+        }
+
+        addDarkHeaderRow(rowsInline, "Tareas Completadas");
+
+        for (Map.Entry<Integer, List<Tarea>> entry : completedTareasBySprint.entrySet()) {
+            addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
+            for (Tarea tarea : entry.getValue()) {
+                addTaskButton(rowsInline, tarea);
+            }
+        }
+
+        markupInline.setKeyboard(rowsInline);
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("Here's your organized task list. Click on a task to see details:");
+        message.setReplyMarkup(markupInline);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            logger.error("Error sending organized task list", e);
         }
     }
 
-    markupInline.setKeyboard(rowsInline);
-
-    SendMessage message = new SendMessage();
-    message.setChatId(chatId);
-    message.setText("Here's your organized task list. Click on a task to see details:");
-    message.setReplyMarkup(markupInline);
-
-    try {
-        execute(message);
-    } catch (TelegramApiException e) {
-        logger.error("Error sending organized task list", e);
-    }
-}
-
-private void addDarkHeaderRow(List<List<InlineKeyboardButton>> rowsInline, String headerText) {
-    List<InlineKeyboardButton> headerRow = new ArrayList<>();
-    InlineKeyboardButton headerButton = new InlineKeyboardButton();
-    headerButton.setText("▪️▪️▪️▪️▪️ " + headerText + " ▪️▪️▪️▪️▪️");  
-    headerButton.setCallbackData("HEADER_" + headerText);
-    headerRow.add(headerButton);
-    rowsInline.add(headerRow);
-}
-
-
-
-    private void addHeaderRow(List<List<InlineKeyboardButton>> rowsInline, String headerText) {
+    private void addDarkHeaderRow(List<List<InlineKeyboardButton>> rowsInline, String headerText) {
         List<InlineKeyboardButton> headerRow = new ArrayList<>();
         InlineKeyboardButton headerButton = new InlineKeyboardButton();
-        headerButton.setText(headerText);
-        headerButton.setCallbackData("HEADER_" + headerText); // This won't be used, it's just to satisfy the API
+        headerButton.setText("▪️▪️▪️▪️▪️ " + headerText + " ▪️▪️▪️▪️▪️");  
+        headerButton.setCallbackData("HEADER_" + headerText);
         headerRow.add(headerButton);
         rowsInline.add(headerRow);
     }
 
     private void addTaskButton(List<List<InlineKeyboardButton>> rowsInline, Tarea tarea) {
-        List<InlineKeyboardButton> taskRow = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton taskButton = new InlineKeyboardButton();
         taskButton.setText(tarea.getDescripcionTarea());
         taskButton.setCallbackData("TASK_" + tarea.getIDTarea());
-        taskRow.add(taskButton);
-        rowsInline.add(taskRow);
+        rowInline.add(taskButton);
+        rowsInline.add(rowInline);
     }
 
     private void showTaskDetails(long chatId, int taskId) {
@@ -331,89 +299,77 @@ private void addDarkHeaderRow(List<List<InlineKeyboardButton>> rowsInline, Strin
         }
     }
 
-    private void startNewTareaConversation(long chatId) {
-        userConversationState.put(chatId, new HashMap<>());
-        askForNextTareaField(chatId);
-    }
-
-    private void askForNextTareaField(long chatId) {
-        Map<String, String> state = userConversationState.get(chatId);
-        int nextFieldIndex = state.size();
-        if (nextFieldIndex < TAREA_FIELDS.length) {
-            String nextField = TAREA_FIELDS[nextFieldIndex];
-            String prompt = getPromptForField(nextField);
-            BotHelper.sendMessageToTelegram(chatId, prompt, this);
-        } else {
-            addNewTarea(chatId);
-        }
-    }
-
-    private String getPromptForField(String field) {
-        switch (field) {
-            case "descripcion":
-                return "Por favor, ingrese la descripción de la tarea:";
-            case "fechaVencimiento":
-                return "Ingrese la fecha de vencimiento (formato: dd/MM/yyyy):";
-            case "idSprint":
-                return "Ingrese el ID del sprint (0 si no aplica):";
-            case "idUsuario":
-                return "Ingrese el ID del usuario asignado (0 si no está asignado):";
-            default:
-                return "Ingrese el valor para " + field + ":";
-        }
-    }
-
-    private void handleTareaInput(long chatId, String input) {
-        Map<String, String> state = userConversationState.get(chatId);
-        int currentFieldIndex = state.size();
-        String currentField = TAREA_FIELDS[currentFieldIndex];
-        
-        state.put(currentField, input);
-        
-        if (currentFieldIndex == TAREA_FIELDS.length - 1) {
-            addNewTarea(chatId);
-        } else {
-            askForNextTareaField(chatId);
-        }
-    }
-
-    private void addNewTarea(long chatId) {
+    private void promptForNewTarea(long chatId) {
         try {
-            Map<String, String> state = userConversationState.get(chatId);
-            Tarea newTarea = new Tarea();
-            newTarea.setDescripcionTarea(state.get("descripcion"));
-            newTarea.setFechaAsignacion(new Date());
-            newTarea.setEstadoTarea(false);
-            
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            newTarea.setFechaVencimiento(dateFormat.parse(state.get("fechaVencimiento")));
-            
-            newTarea.setIDSprint(Integer.parseInt(state.get("idSprint")));
-            newTarea.setIDUsuario(Integer.parseInt(state.get("idUsuario")));
+            SendMessage messageToTelegram = new SendMessage();
+            messageToTelegram.setChatId(chatId);
+            messageToTelegram.setText("Por favor, ingrese la nueva tarea en el siguiente formato:\n" +
+                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario\n" +
+                    "Ejemplo: Comprar leche, 25/12/2023, 1, 2");
+            // hide keyboard
+            ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
+            messageToTelegram.setReplyMarkup(keyboardMarkup);
 
-            Tarea savedTarea = tareaService.addTarea(newTarea);
+            // send message
+            execute(messageToTelegram);
 
-            String responseMessage = String.format("Nueva tarea añadida:\nID: %d\nDescripción: %s\nFecha de vencimiento: %s\nID Sprint: %d\nID Usuario: %d", 
-                                                   savedTarea.getIDTarea(), savedTarea.getDescripcionTarea(),
-                                                   dateFormat.format(savedTarea.getFechaVencimiento()),
-                                                   savedTarea.getIDSprint(), savedTarea.getIDUsuario());
-
-            BotHelper.sendMessageToTelegram(chatId, responseMessage, this);
-            
-            userConversationState.remove(chatId);
-            showMainMenu(chatId);
         } catch (Exception e) {
-            logger.error("Error al añadir nueva tarea: " + e.getMessage(), e);
-            BotHelper.sendMessageToTelegram(chatId, "Lo siento, hubo un error al añadir la tarea. Por favor, inténtalo de nuevo.", this);
-            userConversationState.remove(chatId);
-            showMainMenu(chatId);
+            logger.error(e.getLocalizedMessage(), e);
         }
     }
-    
+
+    private void addNewTarea(long chatId, String messageTextFromTelegram) {
+        try {
+            String[] parts = messageTextFromTelegram.split(",");
+            if (parts.length != 4) {
+                BotHelper.sendMessageToTelegram(chatId, 
+                    "Formato incorrecto. Por favor, use el siguiente formato:\n" +
+                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario\n" +
+                    "Ejemplo: Comprar leche, 25/12/2023, 1, 2", this);
+                return;
+            }
+
+            String descripcion = parts[0].trim();
+            String fechaVencimientoStr = parts[1].trim();
+            int idSprint = Integer.parseInt(parts[2].trim());
+            int idUsuario = Integer.parseInt(parts[3].trim());
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Date fechaVencimiento = sdf.parse(fechaVencimientoStr);
+
+            Tarea newTarea = new Tarea();
+            newTarea.setDescripcionTarea(descripcion);
+            newTarea.setFechaVencimiento(fechaVencimiento);
+            newTarea.setIDSprint(idSprint);
+            newTarea.setIDUsuario(idUsuario);
+            newTarea.setEstadoTarea(false);
+            newTarea.setFechaAsignacion(Date.from(OffsetDateTime.now().toInstant()));
+
+            tareaService.addTarea(newTarea);
+
+            SendMessage messageToTelegram = new SendMessage();
+            messageToTelegram.setChatId(chatId);
+            messageToTelegram.setText(BotMessages.NEW_ITEM_ADDED.getMessage());
+
+            execute(messageToTelegram);
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId, "Error al añadir la tarea. Por favor, intente de nuevo.", this);
+        }
+    }
+
+    private void promptForTaskId(long chatId) {
+        BotHelper.sendMessageToTelegram(chatId, "Por favor, proporciona el ID de la tarea a eliminar:", this);
+    }
 
     @Override
     public String getBotUsername() {
         return botName;
+    }
+
+    @Override
+    public String getBotToken() {
+        return super.getBotToken();
     }
 
     public List<Tarea> getAllTareas() {

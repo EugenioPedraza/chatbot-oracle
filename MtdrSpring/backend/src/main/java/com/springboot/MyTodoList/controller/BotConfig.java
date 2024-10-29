@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.config;
+package com.springboot.MyTodoList.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -79,7 +79,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                     || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
                 promptForNewTarea(chatId);
             } else {
-                addNewTarea(chatId, messageTextFromTelegram);
+                if (messageTextFromTelegram.matches("\\d+")) {
+                    deleteTareaById(chatId, Integer.parseInt(messageTextFromTelegram));
+                } else {
+                    addNewTarea(chatId, messageTextFromTelegram);
+                }
             }
         } else if (update.hasCallbackQuery()) {
             String callData = update.getCallbackQuery().getData();
@@ -360,6 +364,20 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
     private void promptForTaskId(long chatId) {
         BotHelper.sendMessageToTelegram(chatId, "Por favor, proporciona el ID de la tarea a eliminar:", this);
+    }
+
+    private void deleteTareaById(long chatId, int tareaId) {
+        try {
+            boolean isDeleted = tareaService.deleteTarea(tareaId);
+            if (isDeleted) {
+                BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " ha sido eliminada.", this);
+            } else {
+                BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con ID " + tareaId + ".", this);
+            }
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            BotHelper.sendMessageToTelegram(chatId, "Error al eliminar la tarea. Por favor, intente de nuevo.", this);
+        }
     }
 
     @Override

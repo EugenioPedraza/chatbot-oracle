@@ -10,6 +10,7 @@ import TaskIcon from '@mui/icons-material/Task';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import Moment from 'react-moment'; // Importando librería para manejo de fechas
+import {useNavigate} from 'react-router-dom';  // Import for navigation
 
 // Componente principal de la aplicación
 function App() {
@@ -26,6 +27,13 @@ function App() {
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false); // Estado para manejar el diálogo de agregar nueva tarea
     const [newUser, setNewUser] = useState('');
     const [newPoints, setNewPoints] = useState('');
+    const [navigate] = useNavigate();  // Hook for navigation
+
+
+    // Function to handle navigation to the stats page
+    const goToStats = () => {
+        navigate('/stats');
+    };
 
     // Función para manejar el cierre de sesión
     const handleLogout = async () => {

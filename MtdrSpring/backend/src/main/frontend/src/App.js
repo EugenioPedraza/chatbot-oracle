@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from './Home';  // Your existing main app logic
-import Stats from './Stats';
+import Stats from './stats';
 
 
 

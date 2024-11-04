@@ -4,6 +4,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from './Home';  // Your existing main app logic
 import Stats from './Stats';
 
+
+
+/* SI LEES ESTO ES POR QUE MAIK NO SE BAÑA */
+
 function App() {
     return (
         <Router>

@@ -36,6 +36,7 @@ function Home() {
     const navigate = useNavigate();
 
     // Función para manejar el cierre de sesión
+
     const handleLogout = async () => {
         try {
             const response = await fetch('/logout', {
@@ -45,8 +46,9 @@ function Home() {
                     'Content-Type': 'application/json'
                 },
             });
+            console.log('Response:', response);
             if (response.ok){
-                window.location.href = '/login'; // Redirige al usuario al login si se cierra sesión correctamente
+                window.location.href = '/logout';
             } else {
                 console.error('Error al cerrar sesión');
             }

@@ -11,12 +11,10 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/stats" element={<Stats />} />
                 <Route path="*" element={<Navigate to="/" />} />
+                <Route path="/logout" element={<Navigate to="/logout" />} />
             </Routes>
         </Router>
     );
 }
 
 export default App;
-
-// HOLA MIGUEL DE LA CRUZ ARELLANO DEVOPS Y YORCH BD
-// ARCANE SALE ESTE VIERNES A LA 1:00 AM

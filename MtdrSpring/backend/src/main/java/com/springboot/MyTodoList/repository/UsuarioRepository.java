@@ -14,5 +14,6 @@ import com.springboot.MyTodoList.model.Usuario;
 @Transactional
 @EnableTransactionManagement
 public interface UsuarioRepository extends JpaRepository<Usuario,Integer> {
+    // Aqui se realiza la busqueda del usuario con su username
     Optional<Usuario> findByUsername(String username);
 }

@@ -18,14 +18,16 @@ steps:
   - type: Command
     name: "Set PATH Variable"
     command: export PATH=$JAVA_HOME/bin:$PATH
-
+    
   - type: Command
     name: "Docker Login"
-    command:  cd MtdrSpring;
-              oci os object get --bucket-name reacttodo-rolax --name deployment_config.tgz --file deployment_config.tgz;
-              tar -xzvf deployment_config.tgz;
-              source env.sh;
-              cat at.cfg | docker login -u "axzmghqes1gn/adan.ruiz@tec.mx" --password-stdin mx-queretaro-1.ocir.io
+    command: |
+      cd MtdrSpring;
+      oci os object get --bucket-name reacttodo-ehtx3 --name deployment_config.tgz --file deployment_config.tgz || exit 1
+      tar -xzvf deployment_config.tgz || exit 1
+      source env.sh || exit 1
+      cat at.cfg | docker login -u "axjjcwgmt6tj/a00834105@tec.mx" --password-stdin mx-queretaro-1.ocir.io || exit 1
+
 
   - type: Command
     name: "Build"

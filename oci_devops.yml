@@ -36,7 +36,7 @@ steps:
 
   - type: Command
     name: "Install K8s"
-    command:  cd MtdrSpring;
+    command:  cd MtdrSpring/backend;
               wget https://dl.k8s.io/v1.31.2/bin/linux/amd64/kubectl;
               chmod +x kubectl;
               oci ce cluster create-kubeconfig --cluster-id ocid1.cluster.oc1.mx-queretaro-1.aaaaaaaasajbmfcpyzvx6rmvk6rf5mumkqc7tdilav7gtd57ac73xtlczuyq --file $HOME/.kube/config --region mx-queretaro-1 --token-version 2.0.0  --kube-endpoint PUBLIC_ENDPOINT;

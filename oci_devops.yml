@@ -50,4 +50,5 @@ steps:
               source env.sh;
               cd backend;
               ls -l;
+              PATH=$PATH:/root/k8s;
               source undeploy.sh;

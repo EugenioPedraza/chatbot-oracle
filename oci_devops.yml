@@ -46,6 +46,6 @@ steps:
     name: "Undeploy"
     command:  cd MtdrSpring;
               source env.sh;
-              cd MtdrSpring/backend;
+              cd backend;
               ls -l;
               source undeploy.sh;

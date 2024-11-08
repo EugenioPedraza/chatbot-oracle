@@ -46,7 +46,7 @@ steps:
               ls -la;
               chmod +x kubectl;
               export PATH=$PATH:$HOME/k8s;
-              kubectl version;
+              kubectl version --client;
               cd ..
               cd .kube
               oci ce cluster create-kubeconfig --cluster-id ocid1.cluster.oc1.mx-queretaro-1.aaaaaaaasajbmfcpyzvx6rmvk6rf5mumkqc7tdilav7gtd57ac73xtlczuyq --file $HOME/.kube/config --region mx-queretaro-1 --token-version 2.0.0  --kube-endpoint PUBLIC_ENDPOINT;
@@ -60,4 +60,5 @@ steps:
               source env.sh;
               cd backend;
               ls -l;
+              kubectl config view
               source undeploy.sh;

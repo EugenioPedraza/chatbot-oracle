@@ -129,46 +129,48 @@ function Home() {
     }
 
     // Función para cambiar el estado de una tarea
-    function toggleEstado(id, descripcion, estado) {
-        const currentTarea = tareas.find(t => t.idtarea === id);
-        if (!currentTarea) {
-            setError('Tarea no encontrada');
-            return;
-        }
-
-        const updatedTarea = {
-            ...currentTarea,
-            descripcionTarea: descripcion,
-            estadoTarea: !estado // Cambia el estado de la tarea
-        };
-        
-        fetch(`${API_LIST}/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedTarea)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.text().then(text => {
-                    throw new Error(`Error al actualizar la tarea: ${text}`);
-                });
-            }
-        })
-        .then(updatedTarea => {
-            const updatedTareas = tareas.map(tarea => 
-                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
-            );
-            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            setError(error.toString());
-        });
+function toggleEstado(id, descripcion, estado) {
+    const currentTarea = tareas.find(t => t.idtarea === id);
+    if (!currentTarea) {
+        setError('Tarea no encontrada');
+        return;
     }
+
+    const updatedTarea = {
+        ...currentTarea,
+        descripcionTarea: descripcion,
+        estadoTarea: !estado // Cambia el estado de la tarea
+    };
+
+    // Get the CSRF token from the meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`${API_LIST}/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken // Include the CSRF token in the headers
+        },
+        body: JSON.stringify(updatedTarea)
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.text().then(text => {
+                throw new Error(`Error al actualizar la tarea: ${text}`);
+            });
+        }
+    })
+    .then(data => {
+        // Update the local state with the updated task
+        setTareas(prevTareas => prevTareas.map(t => t.idtarea === id ? data : t));
+    })
+    .catch(error => {
+        console.error("Error updating task:", error);
+        setError(error.toString());
+    });
+}
 
     // Función para añadir una nueva tarea
     function addTarea(newTarea) {

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.springboot.MyTodoList.model.Usuario;
@@ -20,6 +21,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Servicio para encontar todos los usuarios
     public List<Usuario> getAllUsuarios() {
@@ -40,10 +44,12 @@ public class UsuarioService {
     // Añadir a un usuario
     public Usuario addUsuario(Usuario usuario) {
         try {
+            // Ensure the password is encoded before saving the user
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
             return usuarioRepository.save(usuario);
         } catch (Exception e) {
-            logger.error("Error adding usuario: ", e);
-            throw e;
+            // Handle the exception appropriately
+            throw new RuntimeException("Error adding usuario", e);
         }
     }
 
@@ -60,19 +66,19 @@ public class UsuarioService {
 
     // Actualizar a un usuario
     public Usuario updateUsuario(int id, Usuario usuario) {
-        Optional<Usuario> usuarioData = usuarioRepository.findById(id);
-        if (usuarioData.isPresent()) {
-            Usuario usuario2 = usuarioData.get();
-            usuario2.setUsername(usuario.getUsername());
-            usuario2.setFullName(usuario.getFullName());
-            usuario2.setRole(usuario.getRole());
-            usuario2.setAdmin(usuario.isAdmin());
-            usuario2.setPhone(usuario.getPhone());
-            usuario2.setContrasena(usuario.getContrasena());
+        return usuarioRepository.findById(id).map(existingUsuario -> {
+            existingUsuario.setUsername(usuario.getUsername());
+            existingUsuario.setFullName(usuario.getFullName());
+            // existingUsuario.setRole(usuario.getRole());
+            existingUsuario.setAdmin(usuario.isAdmin());
+            existingUsuario.setPhone(usuario.getPhone());
+
+            // Ensure the password is encoded before updating if the password is not null
+            if (usuario.getPassword() != null) {
+                existingUsuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            }
             
-            return usuarioRepository.save(usuario2);
-        } else {
-            return null;
-        }
+            return usuarioRepository.save(existingUsuario);
+        }).orElseThrow(() -> new RuntimeException("Usuario not found with id " + id));
     }
 }

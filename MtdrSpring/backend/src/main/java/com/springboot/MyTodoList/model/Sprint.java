@@ -24,17 +24,20 @@ public class Sprint {
     Date fechaFin;
     @Column (name = "ESTADOSPRINT")
     boolean estadoSprint;
+    @Column (name = "NUMSPRINT")
+    int numSprint;
 
     public Sprint() {
 
     }
 
-    public Sprint(int IDSprint, String nombreSprint, Date fechaInicio, Date fechaFin, boolean estadoSprint) {
+    public Sprint(int IDSprint, String nombreSprint, Date fechaInicio, Date fechaFin, boolean estadoSprint, int numSprint) {
         this.IDSprint = IDSprint;
         this.nombreSprint = nombreSprint;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.estadoSprint = estadoSprint;
+        this.numSprint = numSprint;
     }
 
     public int getID() {
@@ -57,6 +60,10 @@ public class Sprint {
         return estadoSprint;
     }
 
+    public int getNumSprint() {
+        return numSprint;
+    }
+
     public void setID(int ID) {
         this.IDSprint = ID;
     }
@@ -77,6 +84,10 @@ public class Sprint {
         this.estadoSprint = estadoSprint;
     }
 
+    public void setNumSprint(int numSprint) {
+        this.numSprint = numSprint;
+    }
+
     @Override
     public String toString() {
         return "Sprint{" +
@@ -85,6 +96,7 @@ public class Sprint {
                 ", fechaInicio=" + fechaInicio +
                 ", fechaFin=" + fechaFin +
                 ", estadoSprint=" + estadoSprint +
+                ", numSprint=" + numSprint +
                 '}';
     }
 }

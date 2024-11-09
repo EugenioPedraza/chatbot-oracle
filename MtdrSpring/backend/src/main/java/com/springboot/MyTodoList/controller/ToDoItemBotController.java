@@ -203,12 +203,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
     private void showTareaList(long chatId) {
         List<Tarea> allTareas = tareaService.findAll();       
-        List<Tarea> pendingTareas = allTareas.stream()
-            .filter(tarea -> !tarea.getEstadoTarea())
-            .collect(Collectors.toList());
 
         Map<Integer, List<Tarea>> completedTareasBySprint = allTareas.stream()
             .filter(Tarea::getEstadoTarea)
+            .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, List<Tarea>> pendingTareasBySprint = allTareas.stream()
+            .filter(tarea -> !tarea.getEstadoTarea())
             .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -216,8 +217,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         addDarkHeaderRow(rowsInline, "Tareas Pendientes");
 
-        for (Tarea tarea : pendingTareas) {
-            addTaskButton(rowsInline, tarea);
+        for (Map.Entry<Integer, List<Tarea>> entry : pendingTareasBySprint.entrySet()) {
+            addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
+            for (Tarea tarea : entry.getValue()) {
+                addTaskButton(rowsInline, tarea);
+            }
         }
 
         addDarkHeaderRow(rowsInline, "Tareas Completadas");

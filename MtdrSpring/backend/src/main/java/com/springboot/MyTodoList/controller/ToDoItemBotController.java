@@ -203,12 +203,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
     private void showTareaList(long chatId) {
         List<Tarea> allTareas = tareaService.findAll();       
-        List<Tarea> pendingTareas = allTareas.stream()
-            .filter(tarea -> !tarea.getEstadoTarea())
-            .collect(Collectors.toList());
 
         Map<Integer, List<Tarea>> completedTareasBySprint = allTareas.stream()
             .filter(Tarea::getEstadoTarea)
+            .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, List<Tarea>> pendingTareasBySprint = allTareas.stream()
+            .filter(tarea -> !tarea.getEstadoTarea())
             .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -216,8 +217,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         addDarkHeaderRow(rowsInline, "Tareas Pendientes");
 
-        for (Tarea tarea : pendingTareas) {
-            addTaskButton(rowsInline, tarea);
+        for (Map.Entry<Integer, List<Tarea>> entry : pendingTareasBySprint.entrySet()) {
+            addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
+            for (Tarea tarea : entry.getValue()) {
+                addTaskButton(rowsInline, tarea);
+            }
         }
 
         addDarkHeaderRow(rowsInline, "Tareas Completadas");
@@ -308,8 +312,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
             messageToTelegram.setText("Por favor, ingrese la nueva tarea en el siguiente formato:\n" +
-                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario\n" +
-                    "Ejemplo: Comprar leche, 25/12/2023, 1, 2");
+                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario, Story Points\n" +
+                    "Ejemplo: Realizar manual de usuario, 25/12/2023, 1, 2, 4");
             // hide keyboard
             ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
             messageToTelegram.setReplyMarkup(keyboardMarkup);
@@ -325,11 +329,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private void addNewTarea(long chatId, String messageTextFromTelegram) {
         try {
             String[] parts = messageTextFromTelegram.split(",");
-            if (parts.length != 4) {
+            if (parts.length != 5) {
                 BotHelper.sendMessageToTelegram(chatId, 
                     "Formato incorrecto. Por favor, use el siguiente formato:\n" +
-                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario\n" +
-                    "Ejemplo: Comprar leche, 25/12/2023, 1, 2", this);
+                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario, Story Points\n" +
+                    "Ejemplo: Realizar manual de usuario, 25/12/2023, 1, 2, 4", this);
                 return;
             }
 
@@ -337,6 +341,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             String fechaVencimientoStr = parts[1].trim();
             int idSprint = Integer.parseInt(parts[2].trim());
             int idUsuario = Integer.parseInt(parts[3].trim());
+            int puntos = Integer.parseInt(parts[4].trim());
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             Date fechaVencimiento = sdf.parse(fechaVencimientoStr);
@@ -346,6 +351,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             newTarea.setFechaVencimiento(fechaVencimiento);
             newTarea.setIDSprint(idSprint);
             newTarea.setIDUsuario(idUsuario);
+            newTarea.setPuntos(puntos);
             newTarea.setEstadoTarea(false);
             newTarea.setFechaAsignacion(Date.from(OffsetDateTime.now().toInstant()));
 

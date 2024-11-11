@@ -8,7 +8,7 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
         puntos: 0,
         idsprint: '',
         idusuario: '',
-        horas: ''
+        horas: 0
     });
 
     function handleSubmit(e) {
@@ -33,12 +33,6 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
             return;
         }
 
-        // Horas no menor a cero
-        if (newTarea.horas < 0) {
-            alert("Las Horas no pueden ser negativas.");
-            return;
-        }
-
         // Hora fija de 11:59 PM a la fecha de vencimiento
         const fechaVencimientoConHora = `${newTarea.fechaVencimiento}T23:59:00`;
 
@@ -57,7 +51,7 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
             puntos: 0,
             idsprint: '',
             idusuario: '',
-            horas: ''
+            horas: 0
         });
     }
 
@@ -99,15 +93,6 @@ function NewItem({ addItem, isInserting, sprints, usuarios }) {
                     label="Story Points"
                     type="number"
                     value={newTarea.puntos}
-                    onChange={handleChange}
-                    margin="normal"
-                />
-                <TextField
-                    fullWidth
-                    name="horas"
-                    label="Horas"
-                    type="number"
-                    value={newTarea.horas}
                     onChange={handleChange}
                     margin="normal"
                 />

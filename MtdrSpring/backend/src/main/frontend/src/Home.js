@@ -488,39 +488,16 @@ function Home() {
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <div>
-                                                    <Typography sx={{ color: 'white' }}>Puntos: {tarea.puntos}<br/></Typography>
-                                                    <Typography sx={{ color: 'white' }}>Usuario: {tarea.nombreUsuario}<br/></Typography>
-                                                    <Typography sx={{ color: 'white' }}>Horas: {tarea.horas}</Typography>
-                                                    <Typography sx={{ color: 'white' }}>Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/></Typography>
-                                                    <Typography sx={{ color: 'white' }}>Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/></Typography>
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos, tarea.fechaAsignacion, tarea.fechaVencimiento)}
-                                                        size="small"
-                                                        sx={{ marginRight: 1, marginTop: 1 }}
-                                                    >
-                                                        Modify
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                        size="small"
-                                                        sx={{ marginTop: 1 }}
-                                                    >
-                                                        Done
-                                                    </Button>
-                                                    <Button
-                                                        startIcon={<DeleteIcon />}
-                                                        variant="contained"
-                                                        color="error"
-                                                        onClick={() => deleteTarea(tarea.idtarea)}
-                                                        size="small"
-                                                        sx={{ marginLeft: 1, marginTop: 1 }}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                </div>
+                                                <Typography sx={{ color: 'white' }}>
+                                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                    Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
+                                                    Sprint: {tarea.nombreSprint}<br/>
+                                                    Puntos: {tarea.puntos}<br/>
+                                                    Usuario: {tarea.nombreUsuario}<br/>
+                                                    Horas: {tarea.horas}<br/>
+                                                    Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
+                                                    Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
+                                                </Typography>
                                             )}
                                         </AccordionDetails>
                                     </Accordion>
@@ -551,7 +528,9 @@ function Home() {
                                                 Sprint: {tarea.nombreSprint}<br/>
                                                 Puntos: {tarea.puntos}<br/>
                                                 Usuario: {tarea.nombreUsuario}<br/>
-                                                Horas: {tarea.horas}
+                                                Horas: {tarea.horas}<br/>
+                                                Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
+                                                Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
                                             </Typography>
                                             <Button
                                                 variant="contained"

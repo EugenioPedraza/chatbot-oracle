@@ -174,7 +174,7 @@ function Stats() {
                         mb: 4,
                         textAlign: 'center'
                     }}>
-                        <Typography variant="h5" sx={{ color: 'white', mb: 2 }}>Distribución de Tareas (Pie Chart)</Typography>
+                        <Typography variant="h5" sx={{ color: 'white', mb: 2 }}>Distribución de Tareas</Typography>
                         <Box sx={{ height: 300, display: 'flex', justifyContent: 'center' }}>
                             <Pie data={chartData.pie} options={{ responsive: true }} />
                         </Box>
@@ -188,7 +188,7 @@ function Stats() {
                         mb: 4,
                         textAlign: 'center'
                     }}>
-                        <Typography variant="h5" sx={{ color: 'white', mb: 2 }}>Progreso de Sprints (Bar Chart)</Typography>
+                        <Typography variant="h5" sx={{ color: 'white', mb: 2 }}>Progreso de Sprints</Typography>
                         <Box sx={{ height: 300, display: 'flex', justifyContent: 'center' }}>
                             <Bar data={chartData.sprintBar} options={{ responsive: true, maintainAspectRatio: false }} />
                         </Box>
@@ -202,7 +202,7 @@ function Stats() {
                         mb: 4,
                         textAlign: 'center'
                     }}>
-                        <Typography variant="h5" sx={{ color: 'white', mb: 2 }}>Progreso de Usuarios (Bar Chart)</Typography>
+                        <Typography variant="h5" sx={{ color: 'white', mb: 2 }}>Progreso de Usuarios</Typography>
                         <Box sx={{ height: 300, display: 'flex', justifyContent: 'center' }}>
                             <Bar data={chartData.userBar} options={{ responsive: true, maintainAspectRatio: false }} />
                         </Box>

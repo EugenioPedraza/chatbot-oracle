@@ -68,12 +68,14 @@ function Home() {
         const sprintsAgrupados = tareas.reduce((acc, tarea) => {
             const sprint = tarea.nombreSprint;
             if (!acc[sprint]) {
-                acc[sprint] = { pendientes: [], completadas: [] }; // Inicializa el objeto con arrays de pendientes y completadas
+                acc[sprint] = { pendientes: [], enProgreso: [], completadas: [] }; // Inicializa el objeto con arrays de pendientes, en progreso y completadas
             }
             if (tarea.estadoTarea) {
                 acc[sprint].completadas.push(tarea); // Añade a completadas si la tarea está completada
+            } else if (tarea.fechaInicio) {
+                acc[sprint].enProgreso.push(tarea); // Añade a en progreso si la tarea tiene fecha de inicio
             } else {
-                acc[sprint].pendientes.push(tarea); // Añade a pendientes si la tarea no está completada
+                acc[sprint].pendientes.push(tarea); // Añade a pendientes si la tarea no está completada y no tiene fecha de inicio
             }
             return acc;
         }, {});
@@ -85,7 +87,6 @@ function Home() {
             return acc;
         }, {});
     }
-
     // Función para cargar tareas, sprints y usuarios desde la API
     function loadTareasSprintsAndUsuarios() {
         setLoading(true); // Establece isLoading a true mientras se cargan los datos
@@ -316,31 +317,7 @@ function Home() {
                                             id={`panel${tarea.idtarea}-header`}
                                         >
                                             <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
-                                            {editingId === tarea.idtarea ? (
-                                                <TextField 
-                                                    value={newDescription}
-                                                    onChange={(e) => setNewDescription(e.target.value)}
-                                                    label="Descripción"
-                                                    fullWidth
-                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                    inputProps={{ style: { color: 'white' } }}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                borderColor: 'white', // Color del borde
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                borderColor: 'white', // Color del borde al enfocar
-                                                            },
-                                                        },
-                                                    }}
-                                                />
-                                            ) : (
-                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                            )}
+                                            <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             {editingId === tarea.idtarea ? (
@@ -533,7 +510,72 @@ function Home() {
                             </div>
                         )
                     ))}
-
+    
+                    <h2 style={{ marginTop: '30px' }}>Tareas En Progreso</h2>
+                    {Object.entries(agruparPorSprint()).some(([_, tareasDelSprint]) => tareasDelSprint.enProgreso.length > 0) ? (
+                        Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
+                            tareasDelSprint.enProgreso.length > 0 && (
+                                <div key={nombreSprint}>
+                                    <h3>{nombreSprint}</h3>
+                                    {tareasDelSprint.enProgreso.map(tarea => (
+                                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030'}}>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                                aria-controls={`panel${tarea.idtarea}-content`}
+                                                id={`panel${tarea.idtarea}-header`}
+                                            >
+                                                <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
+                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <div>
+                                                    <Typography sx={{ color: 'white' }}>
+                                                        Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                                                        Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
+                                                        Sprint: {tarea.nombreSprint}<br/>
+                                                        Puntos: {tarea.puntos}<br/>
+                                                        Usuario: {tarea.nombreUsuario}<br/>
+                                                        Horas: {tarea.horas}<br/>
+                                                        Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
+                                                        Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
+                                                    </Typography>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos, tarea.fechaAsignacion, tarea.fechaVencimiento)}
+                                                        size="small"
+                                                        sx={{ marginRight: 1, marginTop: 1 }}
+                                                    >
+                                                        Modify
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
+                                                        size="small"
+                                                        sx={{ marginTop: 1 }}
+                                                    >
+                                                        Done
+                                                    </Button>
+                                                    <Button
+                                                        startIcon={<DeleteIcon />}
+                                                        variant="contained"
+                                                        color="error"
+                                                        onClick={() => deleteTarea(tarea.idtarea)}
+                                                        size="small"
+                                                        sx={{ marginLeft: 1, marginTop: 1 }}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    ))}
+                                </div>
+                            )
+                        ))
+                    ) : (
+                        <Typography sx={{ color: 'white' }}>No hay tareas en progreso</Typography>
+                    )}
+    
                     <h2 style={{ marginTop: '30px' }}>Tareas Completadas</h2>
                     {Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
                         tareasDelSprint.completadas.length > 0 && (
@@ -591,5 +633,6 @@ function Home() {
 }
 
 
-
 export default Home;
+
+

@@ -1,1 +1,36 @@
+version: 0.1 
+component: build
+timeoutInSeconds: 600
+shell: bash
 
+env:
+  variables:
+    JAVA_HOME: /usr/lib64/graalvm/graalvm22-ee-java17
+
+  exportedVariables:
+    - BuildServiceDemoVersion
+    
+ - type: Command
+    name: "Install K8s"
+    command: mkdir -p $HOME/.kube;
+      cd $HOME;
+      ls -la;
+      mkdir k8s;
+      ls -la;
+      cd k8s;
+      wget https://dl.k8s.io/v1.31.2/bin/linux/amd64/kubectl;
+      ls -la;
+      chmod +x kubectl;
+      export PATH=$PATH:$HOME/k8s;
+      kubectl version --client;
+      cd ..;
+      cd .kube;
+      oci ce cluster create-kubeconfig --cluster-id ocid1.cluster.oc1.mx-queretaro-1.aaaaaaaasajbmfcpyzvx6rmvk6rf5mumkqc7tdilav7gtd57ac73xtlczuyq --file $HOME/.kube/config --region mx-queretaro-1 --token-version 2.0.0  --kube-endpoint PUBLIC_ENDPOINT;
+      export KUBECONFIG=$HOME/.kube/config;
+
+ - type: Command
+    name: "IP Config"
+    command: cd MtdrSpring;
+             cd backend;
+             ls -la;
+             source satisfactorio.sh;

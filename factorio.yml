@@ -9,26 +9,26 @@ env:
   exportedVariables:
     - BuildServiceDemoVersion
 
-phases:
-  build:
-    commands:
-      - echo "Starting Build Phase"
-      - mkdir -p $HOME/.kube
-      - cd $HOME
-      - ls -la
-      - mkdir k8s
-      - ls -la
-      - cd k8s
-      - wget https://dl.k8s.io/v1.31.2/bin/linux/amd64/kubectl
-      - ls -la
-      - chmod +x kubectl
-      - export PATH=$PATH:$HOME/k8s
-      - kubectl version --client
-      - cd ..
-      - cd .kube
-      - oci ce cluster create-kubeconfig --cluster-id ocid1.cluster.oc1.mx-queretaro-1.aaaaaaaasajbmfcpyzvx6rmvk6rf5mumkqc7tdilav7gtd57ac73xtlczuyq --file $HOME/.kube/config --region mx-queretaro-1 --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT
-      - export KUBECONFIG=$HOME/.kube/config
-      - cd MtdrSpring
-      - cd backend
-      - ls -la
-      - source satisfactorio.sh
+-type: command
+ build:
+ commands:
+    - echo "Starting Build Phase"
+    - mkdir -p $HOME/.kube
+    - cd $HOME
+    - ls -la
+    - mkdir k8s
+    - ls -la
+    - cd k8s
+    - wget https://dl.k8s.io/v1.31.2/bin/linux/amd64/kubectl
+    - ls -la
+    - chmod +x kubectl
+    - export PATH=$PATH:$HOME/k8s
+    - kubectl version --client
+    - cd ..
+    - cd .kube
+    - oci ce cluster create-kubeconfig --cluster-id ocid1.cluster.oc1.mx-queretaro-1.aaaaaaaasajbmfcpyzvx6rmvk6rf5mumkqc7tdilav7gtd57ac73xtlczuyq --file $HOME/.kube/config --region mx-queretaro-1 --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT
+    - export KUBECONFIG=$HOME/.kube/config
+    - cd MtdrSpring
+    - cd backend
+    - ls -la
+    - source satisfactorio.sh

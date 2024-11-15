@@ -13,7 +13,7 @@ import Moment from 'react-moment'; // Importando librería para manejo de fechas
 //router stuff
 // In your Home.js, add this to import:
 import { useNavigate } from 'react-router-dom';
-
+import TaskAccordion from './TaskAccordion';
 
 // Componente principal de la aplicación
 function Home() {
@@ -318,264 +318,32 @@ function Home() {
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
                                 {tareasDelSprint.pendientes.map(tarea => (
-                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030'}}>
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                            aria-controls={`panel${tarea.idtarea}-content`}
-                                            id={`panel${tarea.idtarea}-header`}
-                                        >
-                                            <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
-                                            <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                        </AccordionSummary>
-                                            <AccordionDetails>
-                                        {editingId === tarea.idtarea ? (
-                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
-                                                    <TextField
-                                                        value={newPoints}
-                                                        onChange={(e) => setNewPoints(e.target.value)}
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        type="number"
-                                                        sx={{
-                                                            width: '70px',
-                                                            marginTop: 2,
-                                                            marginBottom: 2,
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: 'white', // Color del borde
-                                                                },
-                                                                '&:hover fieldset': {
-                                                                    borderColor: 'white', // Color del borde al pasar el mouse
-                                                                },
-                                                                '&.Mui-focused fieldset': {
-                                                                    borderColor: 'white', // Color del borde al enfocar
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Usuario:</Typography>
-                                                    <FormControl sx={{ minWidth: 300 }}>
-                                                        <Select
-                                                            value={newUser}
-                                                            onChange={(e) => setNewUser(e.target.value)}
-                                                            sx={{
-                                                                color: 'white',
-                                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                                    borderColor: 'white', // Color del borde
-                                                                },
-                                                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                                    borderColor: 'white', // Color del borde al pasar el mouse
-                                                                },
-                                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                                    borderColor: 'white', // Color del borde al enfocar
-                                                                },
-                                                                '& .MuiSelect-icon': {
-                                                                    color: 'white', // Color del icono desplegable
-                                                                },
-                                                            }}
-                                                        >
-                                                            {usuarios.map((usuario) => (
-                                                                <MenuItem key={usuario.idUsuario} value={usuario.idUsuario}>
-                                                                    {usuario.username}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    </FormControl>
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Horas:</Typography>
-                                                    <TextField
-                                                        value={newHours}
-                                                        onChange={(e) => setNewHours(e.target.value)}
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        type="number"
-                                                        sx={{
-                                                            width: '70px',
-                                                            marginTop: 2,
-                                                            marginBottom: 2,
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: 'white', // Color del borde
-                                                                },
-                                                                '&:hover fieldset': {
-                                                                    borderColor: 'white', // Color del borde al pasar el mouse
-                                                                },
-                                                                '&.Mui-focused fieldset': {
-                                                                    borderColor: 'white', // Color del borde al enfocar
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Asignación:</Typography>
-                                                    <TextField
-                                                        value={newAssignedDate}
-                                                        onChange={(e) => setNewAssignedDate(e.target.value)}
-                                                        type="date"
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        sx={{
-                                                            width: '200px',
-                                                            marginTop: 2,
-                                                            marginBottom: 2,
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: 'white', // Color del borde
-                                                                },
-                                                                '&:hover fieldset': {
-                                                                    borderColor: 'white', // Color del borde al pasar el mouse
-                                                                },
-                                                                '&.Mui-focused fieldset': {
-                                                                    borderColor: 'white', // Color del borde al enfocar
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Vencimiento:</Typography>
-                                                    <TextField
-                                                        value={newExpirationDate}
-                                                        onChange={(e) => setNewExpirationDate(e.target.value)}
-                                                        type="date"
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        sx={{
-                                                            width: '200px',
-                                                            marginTop: 2,
-                                                            marginBottom: 2,
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: 'white', // Color del borde
-                                                                },
-                                                                '&:hover fieldset': {
-                                                                    borderColor: 'white', // Color del borde al pasar el mouse
-                                                                },
-                                                                '&.Mui-focused fieldset': {
-                                                                    borderColor: 'white', // Color del borde al enfocar
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Inicio:</Typography>
-                                                    <TextField
-                                                        value={newStartDate}
-                                                        onChange={(e) => setNewStartDate(e.target.value)}
-                                                        type="date"
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        sx={{
-                                                            width: '200px',
-                                                            marginTop: 2,
-                                                            marginBottom: 2,
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: 'white',
-                                                                },
-                                                                '&:hover fieldset': {
-                                                                    borderColor: 'white',
-                                                                },
-                                                                '&.Mui-focused fieldset': {
-                                                                    borderColor: 'white',
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Fin:</Typography>
-                                                    <TextField
-                                                        value={newEndDate}
-                                                        onChange={(e) => setNewEndDate(e.target.value)}
-                                                        type="date"
-                                                        InputLabelProps={{ style: { color: 'white' } }}
-                                                        inputProps={{ style: { color: 'white' } }}
-                                                        sx={{
-                                                            width: '200px',
-                                                            marginTop: 2,
-                                                            marginBottom: 2,
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: 'white',
-                                                                },
-                                                                '&:hover fieldset': {
-                                                                    borderColor: 'white',
-                                                                },
-                                                                '&.Mui-focused fieldset': {
-                                                                    borderColor: 'white',
-                                                                },
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={() => saveEditTarea(tarea.idtarea)}
-                                                        size="small"
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="secondary"
-                                                        onClick={() => setEditingId(null)}
-                                                        size="small"
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <Typography sx={{ color: 'white' }}>
-                                                    Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                                    Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
-                                                    Sprint: {tarea.nombreSprint}<br/>
-                                                    Puntos: {tarea.puntos}<br/>
-                                                    Usuario: {tarea.nombreUsuario}<br/>
-                                                    Horas: {tarea.horas}<br/>
-                                                    Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
-                                                    Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
-                                                </Typography>
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos, tarea.fechaAsignacion, tarea.fechaVencimiento, tarea.fechaInicio, tarea.fechaFin)}
-                                                    size="small"
-                                                    sx={{ marginRight: 1, marginTop: 1 }}
-                                                >
-                                                    Modify
-                                                </Button>
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                    size="small"
-                                                    sx={{ marginTop: 1 }}
-                                                >
-                                                    Done
-                                                </Button>
-                                                <Button
-                                                    startIcon={<DeleteIcon />}
-                                                    variant="contained"
-                                                    color="error"
-                                                    onClick={() => deleteTarea(tarea.idtarea)}
-                                                    size="small"
-                                                    sx={{ marginLeft: 1, marginTop: 1 }}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </AccordionDetails>
-                                </Accordion>
+                                    <TaskAccordion
+                                        key={tarea.idtarea}
+                                        tarea={tarea}
+                                        usuarios={usuarios}
+                                        editingId={editingId}
+                                        newPoints={newPoints}
+                                        newUser={newUser}
+                                        newHours={newHours}
+                                        newAssignedDate={newAssignedDate}
+                                        newExpirationDate={newExpirationDate}
+                                        newStartDate={newStartDate}
+                                        newEndDate={newEndDate}
+                                        setNewPoints={setNewPoints}
+                                        setNewUser={setNewUser}
+                                        setNewHours={setNewHours}
+                                        setNewAssignedDate={setNewAssignedDate}
+                                        setNewExpirationDate={setNewExpirationDate}
+                                        setNewStartDate={setNewStartDate}
+                                        setNewEndDate={setNewEndDate}
+                                        startEditTarea={startEditTarea}
+                                        saveEditTarea={saveEditTarea}
+                                        setEditingId={setEditingId}
+                                        toggleEstado={toggleEstado}
+                                        deleteTarea={deleteTarea}
+                                        isCompleted={false}
+                                    />
                                 ))}
                             </div>
                         )
@@ -588,264 +356,32 @@ function Home() {
                                 <div key={nombreSprint}>
                                     <h3>{nombreSprint}</h3>
                                     {tareasDelSprint.enProgreso.map(tarea => (
-                                        <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030'}}>
-                                            <AccordionSummary
-                                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                                aria-controls={`panel${tarea.idtarea}-content`}
-                                                id={`panel${tarea.idtarea}-header`}
-                                            >
-                                                <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
-                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                            </AccordionSummary>
-                                                <AccordionDetails>
-                                                    {editingId === tarea.idtarea ? (
-                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
-                                                                <TextField
-                                                                    value={newPoints}
-                                                                    onChange={(e) => setNewPoints(e.target.value)}
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    type="number"
-                                                                    sx={{
-                                                                        width: '70px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Usuario:</Typography>
-                                                                <FormControl sx={{ minWidth: 300 }}>
-                                                                    <Select
-                                                                        value={newUser}
-                                                                        onChange={(e) => setNewUser(e.target.value)}
-                                                                        sx={{
-                                                                            color: 'white',
-                                                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                            '& .MuiSelect-icon': {
-                                                                                color: 'white', // Color del icono desplegable
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        {usuarios.map((usuario) => (
-                                                                            <MenuItem key={usuario.idUsuario} value={usuario.idUsuario}>
-                                                                                {usuario.username}
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                </FormControl>
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Horas:</Typography>
-                                                                <TextField
-                                                                    value={newHours}
-                                                                    onChange={(e) => setNewHours(e.target.value)}
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    type="number"
-                                                                    sx={{
-                                                                        width: '70px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Asignación:</Typography>
-                                                                <TextField
-                                                                    value={newAssignedDate}
-                                                                    onChange={(e) => setNewAssignedDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Vencimiento:</Typography>
-                                                                <TextField
-                                                                    value={newExpirationDate}
-                                                                    onChange={(e) => setNewExpirationDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Inicio:</Typography>
-                                                                <TextField
-                                                                    value={newStartDate}
-                                                                    onChange={(e) => setNewStartDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Fin:</Typography>
-                                                                <TextField
-                                                                    value={newEndDate}
-                                                                    onChange={(e) => setNewEndDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                                <Button
-                                                                    variant="contained"
-                                                                    onClick={() => saveEditTarea(tarea.idtarea)}
-                                                                    size="small"
-                                                                >
-                                                                    Save
-                                                                </Button>
-                                                                <Button
-                                                                    variant="contained"
-                                                                    color="secondary"
-                                                                    onClick={() => setEditingId(null)}
-                                                                    size="small"
-                                                                >
-                                                                    Cancel
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            <Typography sx={{ color: 'white' }}>
-                                                                Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                                                Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
-                                                                Sprint: {tarea.nombreSprint}<br/>
-                                                                Puntos: {tarea.puntos}<br/>
-                                                                Usuario: {tarea.nombreUsuario}<br/>
-                                                                Horas: {tarea.horas}<br/>
-                                                                Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
-                                                                Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
-                                                            </Typography>
-                                                            <Button
-                                                                variant="contained"
-                                                                onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos, tarea.fechaAsignacion, tarea.fechaVencimiento, tarea.fechaInicio, tarea.fechaFin)}
-                                                                size="small"
-                                                                sx={{ marginRight: 1, marginTop: 1 }}
-                                                            >
-                                                                Modify
-                                                            </Button>
-                                                            <Button
-                                                                variant="contained"
-                                                                onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                                size="small"
-                                                                sx={{ marginTop: 1 }}
-                                                            >
-                                                                Done
-                                                            </Button>
-                                                            <Button
-                                                                startIcon={<DeleteIcon />}
-                                                                variant="contained"
-                                                                color="error"
-                                                                onClick={() => deleteTarea(tarea.idtarea)}
-                                                                size="small"
-                                                                sx={{ marginLeft: 1, marginTop: 1 }}
-                                                            >
-                                                                Delete
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </AccordionDetails>
-                                        </Accordion>
+                                        <TaskAccordion
+                                            key={tarea.idtarea}
+                                            tarea={tarea}
+                                            usuarios={usuarios}
+                                            editingId={editingId}
+                                            newPoints={newPoints}
+                                            newUser={newUser}
+                                            newHours={newHours}
+                                            newAssignedDate={newAssignedDate}
+                                            newExpirationDate={newExpirationDate}
+                                            newStartDate={newStartDate}
+                                            newEndDate={newEndDate}
+                                            setNewPoints={setNewPoints}
+                                            setNewUser={setNewUser}
+                                            setNewHours={setNewHours}
+                                            setNewAssignedDate={setNewAssignedDate}
+                                            setNewExpirationDate={setNewExpirationDate}
+                                            setNewStartDate={setNewStartDate}
+                                            setNewEndDate={setNewEndDate}
+                                            startEditTarea={startEditTarea}
+                                            saveEditTarea={saveEditTarea}
+                                            setEditingId={setEditingId}
+                                            toggleEstado={toggleEstado}
+                                            deleteTarea={deleteTarea}
+                                            isCompleted={false}
+                                        />
                                     ))}
                                 </div>
                             )
@@ -853,293 +389,47 @@ function Home() {
                     ) : (
                         <Typography sx={{ color: 'white' }}>No hay tareas en progreso</Typography>
                     )}
-                        <h2 style={{ marginTop: '30px' }}>Tareas Completadas</h2>
-                            {Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
-                                tareasDelSprint.completadas.length > 0 && (
-                                    <div key={nombreSprint}>
-                                        <h3>{nombreSprint}</h3>
-                                        {tareasDelSprint.completadas.map(tarea => (
-                                            <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030' }}>
-                                                <AccordionSummary
-                                                    expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                                    aria-controls={`panel${tarea.idtarea}-content`}
-                                                    id={`panel${tarea.idtarea}-header`}
-                                                >
-                                                    <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
-                                                    <Typography sx={{ color: 'white', position: 'relative' }}>
-                                                        {tarea.descripcionTarea}
-                                                        {(!tarea.fechaInicio || !tarea.fechaFin) && (
-                                                            <span style={{ color: 'red', fontWeight: 'bold', marginLeft: '10px', cursor: 'pointer' }}>
-                                                                !
-                                                                <div className="tooltip">
-                                                                    <ul style={{ margin: 0, padding: '5px', listStyleType: 'disc', fontSize: '12px', fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                                                                        {!tarea.fechaInicio && <li>Marcado como completado pero sin fecha de inicio</li>}
-                                                                        {!tarea.fechaFin && <li>Marcado como completado pero sin fecha de fin</li>}
-                                                                    </ul>
-                                                                </div>
-                                                            </span>
-                                                        )}
-                                                    </Typography>
-                                                </AccordionSummary>
-                                                <AccordionDetails>
-                                                    {editingId === tarea.idtarea ? (
-                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
-                                                                <TextField
-                                                                    value={newPoints}
-                                                                    onChange={(e) => setNewPoints(e.target.value)}
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    type="number"
-                                                                    sx={{
-                                                                        width: '70px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Usuario:</Typography>
-                                                                <FormControl sx={{ minWidth: 300 }}>
-                                                                    <Select
-                                                                        value={newUser}
-                                                                        onChange={(e) => setNewUser(e.target.value)}
-                                                                        sx={{
-                                                                            color: 'white',
-                                                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                            '& .MuiSelect-icon': {
-                                                                                color: 'white', // Color del icono desplegable
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        {usuarios.map((usuario) => (
-                                                                            <MenuItem key={usuario.idUsuario} value={usuario.idUsuario}>
-                                                                                {usuario.username}
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                </FormControl>
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Horas:</Typography>
-                                                                <TextField
-                                                                    value={newHours}
-                                                                    onChange={(e) => setNewHours(e.target.value)}
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    type="number"
-                                                                    sx={{
-                                                                        width: '70px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Asignación:</Typography>
-                                                                <TextField
-                                                                    value={newAssignedDate}
-                                                                    onChange={(e) => setNewAssignedDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Vencimiento:</Typography>
-                                                                <TextField
-                                                                    value={newExpirationDate}
-                                                                    onChange={(e) => setNewExpirationDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white', // Color del borde
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white', // Color del borde al enfocar
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Inicio:</Typography>
-                                                                <TextField
-                                                                    value={newStartDate}
-                                                                    onChange={(e) => setNewStartDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Fin:</Typography>
-                                                                <TextField
-                                                                    value={newEndDate}
-                                                                    onChange={(e) => setNewEndDate(e.target.value)}
-                                                                    type="date"
-                                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                                    inputProps={{ style: { color: 'white' } }}
-                                                                    sx={{
-                                                                        width: '200px',
-                                                                        marginTop: 2,
-                                                                        marginBottom: 2,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '& fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                            '&.Mui-focused fieldset': {
-                                                                                borderColor: 'white',
-                                                                            },
-                                                                        },
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                                <Button
-                                                                    variant="contained"
-                                                                    onClick={() => saveEditTarea(tarea.idtarea)}
-                                                                    size="small"
-                                                                >
-                                                                    Save
-                                                                </Button>
-                                                                <Button
-                                                                    variant="contained"
-                                                                    color="secondary"
-                                                                    onClick={() => setEditingId(null)}
-                                                                    size="small"
-                                                                >
-                                                                    Cancel
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            <Typography sx={{ color: 'white' }}>
-                                                                Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                                                Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
-                                                                Sprint: {tarea.nombreSprint}<br/>
-                                                                Puntos: {tarea.puntos}<br/>
-                                                                Usuario: {tarea.nombreUsuario}<br/>
-                                                                Horas: {tarea.horas}<br/>
-                                                                Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
-                                                                Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
-                                                            </Typography>
-                                                            <Button
-                                                                variant="contained"
-                                                                onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos, tarea.fechaAsignacion, tarea.fechaVencimiento, tarea.fechaInicio, tarea.fechaFin)}
-                                                                size="small"
-                                                                sx={{ marginRight: 1, marginTop: 1 }}
-                                                            >
-                                                                Modify
-                                                            </Button>
-                                                            <Button
-                                                                variant="contained"
-                                                                onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                                size="small"
-                                                                sx={{ marginTop: 1 }}
-                                                            >
-                                                                Undo
-                                                            </Button>
-                                                            <Button
-                                                                startIcon={<DeleteIcon />}
-                                                                variant="contained"
-                                                                color="error"
-                                                                onClick={() => deleteTarea(tarea.idtarea)}
-                                                                size="small"
-                                                                sx={{ marginLeft: 1, marginTop: 1 }}
-                                                            >
-                                                                Delete
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </AccordionDetails>
-                                            </Accordion>
-                                        ))}
-                                    </div>
-                                )
-                            ))}
+                    <h2 style={{ marginTop: '30px' }}>Tareas Completadas</h2>
+                    {Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
+                        tareasDelSprint.completadas.length > 0 && (
+                            <div key={nombreSprint}>
+                                <h3>{nombreSprint}</h3>
+                                {tareasDelSprint.completadas.map(tarea => (
+                                    <TaskAccordion
+                                        key={tarea.idtarea}
+                                        tarea={tarea}
+                                        usuarios={usuarios}
+                                        editingId={editingId}
+                                        newPoints={newPoints}
+                                        newUser={newUser}
+                                        newHours={newHours}
+                                        newAssignedDate={newAssignedDate}
+                                        newExpirationDate={newExpirationDate}
+                                        newStartDate={newStartDate}
+                                        newEndDate={newEndDate}
+                                        setNewPoints={setNewPoints}
+                                        setNewUser={setNewUser}
+                                        setNewHours={setNewHours}
+                                        setNewAssignedDate={setNewAssignedDate}
+                                        setNewExpirationDate={setNewExpirationDate}
+                                        setNewStartDate={setNewStartDate}
+                                        setNewEndDate={setNewEndDate}
+                                        startEditTarea={startEditTarea}
+                                        saveEditTarea={saveEditTarea}
+                                        setEditingId={setEditingId}
+                                        toggleEstado={toggleEstado}
+                                        deleteTarea={deleteTarea}
+                                        isCompleted={true}
+                                    />
+                                ))}
+                            </div>
+                        )
+                    ))}
                 </div>
             )}
         </div>
     );
 }
-
 
 export default Home;
 

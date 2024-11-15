@@ -148,6 +148,6 @@ body {
     white-space: nowrap;
 }
 
-span:hover .tooltip {
+.tooltip-trigger:hover .tooltip {
     display: block;
 }

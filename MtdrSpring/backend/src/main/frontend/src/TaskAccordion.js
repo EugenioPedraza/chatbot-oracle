@@ -6,7 +6,7 @@ import TaskIcon from '@mui/icons-material/Task';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Moment from 'react-moment';
 
-function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted }) {
+function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted, markAsStarted, markAsCompleted, markAsUncompleted }) {
     console.log('Rendering TaskAccordion:', tarea.descripcionTarea, 'isCompleted:', isCompleted, 'fechaInicio:', tarea.fechaInicio, 'fechaFin:', tarea.fechaFin);
 
     return (
@@ -242,14 +242,14 @@ function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHour
                 ) : (
                     <div>
                         <Typography sx={{ color: 'white' }}>
-                            Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                            Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
+                            Asignado el: <Moment format="MMM Do HH:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
+                            Vence el: <Moment format="MMM Do HH:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
                             Sprint: {tarea.nombreSprint}<br/>
                             Puntos: {tarea.puntos}<br/>
                             Usuario: {tarea.nombreUsuario}<br/>
                             Horas: {tarea.horas}<br/>
-                            Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
-                            Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do hh:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
+                            Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
+                            Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
                         </Typography>
                         <Button
                             variant="contained"
@@ -259,14 +259,36 @@ function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHour
                         >
                             Modify
                         </Button>
-                        <Button
-                            variant="contained"
-                            onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                            size="small"
-                            sx={{ marginTop: 1 }}
-                        >
-                            {isCompleted ? 'Undo' : 'Done'}
-                        </Button>
+                        {isCompleted ? (
+                            <Button
+                                variant="contained"
+                                onClick={() => markAsUncompleted(tarea.idtarea)}
+                                size="small"
+                                sx={{ marginTop: 1 }}
+                            >
+                                Undo
+                            </Button>
+                        ) : (
+                            tarea.fechaInicio ? (
+                                <Button
+                                    variant="contained"
+                                    onClick={() => markAsCompleted(tarea.idtarea)}
+                                    size="small"
+                                    sx={{ marginTop: 1 }}
+                                >
+                                    Done
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="contained"
+                                    onClick={() => markAsStarted(tarea.idtarea)}
+                                    size="small"
+                                    sx={{ marginTop: 1 }}
+                                >
+                                    Start
+                                </Button>
+                            )
+                        )}
                         <Button
                             startIcon={<DeleteIcon />}
                             variant="contained"

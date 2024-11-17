@@ -39,6 +39,22 @@ function Home() {
     // Inside your Home component:
     const navigate = useNavigate();
 
+    // Helper function to set date at 00:00
+    function setDateAtStartOfDay(date) {
+        if (!date) return null;
+        const d = new Date(date);
+        d.setUTCHours(0, 0, 0, 0);
+        return d.toISOString();
+    }
+
+    // Helper function to set date at 23:59
+    function setDateAtEndOfDay(date) {
+        if (!date) return null;
+        const d = new Date(date);
+        d.setUTCHours(23, 59, 59, 999);
+        return d.toISOString();
+    }
+
     // Función para manejar el cierre de sesión
     const handleLogout = async () => {
         try {
@@ -231,10 +247,10 @@ function Home() {
             horas: newHours,
             idusuario: newUser,
             puntos: newPoints,
-            fechaAsignacion: newAssignedDate,
-            fechaVencimiento: newExpirationDate,
-            fechaInicio: newStartDate,
-            fechaFin: newEndDate,
+            fechaAsignacion: setDateAtStartOfDay(newAssignedDate),
+            fechaVencimiento: setDateAtEndOfDay(newExpirationDate),
+            fechaInicio: setDateAtStartOfDay(newStartDate),
+            fechaFin: setDateAtEndOfDay(newEndDate),
         };
 
         fetch(`${API_LIST}/${id}`, {
@@ -267,6 +283,131 @@ function Home() {
             setNewExpirationDate('');
             setNewStartDate('');
             setNewEndDate('');
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.toString());
+        });
+    }
+
+    // Function to mark a task as started
+    function markAsStarted(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
+        const updatedTarea = {
+            ...currentTarea,
+            fechaInicio: new Date().toISOString()
+        };
+
+        fetch(`${API_LIST}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTarea)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
+            }
+        })
+        .then(updatedTarea => {
+            const updatedTareas = tareas.map(tarea => 
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+            );
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.toString());
+        });
+    }
+
+    // Function to mark a task as completed
+    function markAsCompleted(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
+        const updatedTarea = {
+            ...currentTarea,
+            estadoTarea: true,
+            fechaFin: new Date().toISOString()
+        };
+
+        fetch(`${API_LIST}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTarea)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
+            }
+        })
+        .then(updatedTarea => {
+            const updatedTareas = tareas.map(tarea => 
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+            );
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.toString());
+        });
+    }
+
+    // Function to mark a task as uncompleted
+    function markAsUncompleted(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
+        const updatedTarea = {
+            ...currentTarea,
+            estadoTarea: false,
+            fechaFin: null
+        };
+
+        fetch(`${API_LIST}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTarea)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
+            }
+        })
+        .then(updatedTarea => {
+            const updatedTareas = tareas.map(tarea => 
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+            );
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -343,6 +484,9 @@ function Home() {
                                         toggleEstado={toggleEstado}
                                         deleteTarea={deleteTarea}
                                         isCompleted={false}
+                                        markAsStarted={markAsStarted}
+                                        markAsCompleted={markAsCompleted}
+                                        markAsUncompleted={markAsUncompleted}
                                     />
                                 ))}
                             </div>
@@ -381,6 +525,9 @@ function Home() {
                                             toggleEstado={toggleEstado}
                                             deleteTarea={deleteTarea}
                                             isCompleted={false}
+                                            markAsStarted={markAsStarted}
+                                            markAsCompleted={markAsCompleted}
+                                            markAsUncompleted={markAsUncompleted}
                                         />
                                     ))}
                                 </div>
@@ -420,6 +567,9 @@ function Home() {
                                         toggleEstado={toggleEstado}
                                         deleteTarea={deleteTarea}
                                         isCompleted={true}
+                                        markAsStarted={markAsStarted}
+                                        markAsCompleted={markAsCompleted}
+                                        markAsUncompleted={markAsUncompleted}
                                     />
                                 ))}
                             </div>

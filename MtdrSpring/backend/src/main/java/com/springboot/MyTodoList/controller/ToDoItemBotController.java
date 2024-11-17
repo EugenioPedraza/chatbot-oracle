@@ -233,9 +233,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     }
 
     private void showMainMenu(long chatId) {
+
+        Integer userId = chatIds.get(chatId);
+        String userName = userService.getUsernameById(userId);
+
         SendMessage messageToTelegram = new SendMessage();
         messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
+        messageToTelegram.setText("Hello " + userName + "! I'm MyTodoList Bot!\nType a new todo item below and press the send button (blue arrow), or select an option below:");
 
         // Configurar teclado personalizado
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
@@ -422,8 +426,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
             messageToTelegram.setText("Por favor, ingrese la nueva tarea en el siguiente formato:\n" +
-                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario, Story Points\n" +
-                    "Ejemplo: Realizar manual de usuario, 25/12/2023, 1, 2, 4");
+                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, Story Points\n" +
+                    "Ejemplo: Realizar manual de usuario, 25/12/2023, 1, 4");
             // hide keyboard
             ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
             messageToTelegram.setReplyMarkup(keyboardMarkup);
@@ -439,7 +443,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private void addNewTarea(long chatId, String messageTextFromTelegram) {
         try {
             String[] parts = messageTextFromTelegram.split(",");
-            if (parts.length != 5) {
+            if (parts.length != 4) {
                 BotHelper.sendMessageToTelegram(chatId, 
                     "No entiendo ese comando, asegúrate de usar el formato correcto.", this);
                 return;
@@ -448,8 +452,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             String descripcion = parts[0].trim();
             String fechaVencimientoStr = parts[1].trim();
             int idSprint = Integer.parseInt(parts[2].trim());
-            int idUsuario = Integer.parseInt(parts[3].trim());
-            int puntos = Integer.parseInt(parts[4].trim());
+            int puntos = Integer.parseInt(parts[3].trim());
+
+            Integer idUsuario = chatIds.get(chatId);
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             Date fechaVencimiento = sdf.parse(fechaVencimientoStr);

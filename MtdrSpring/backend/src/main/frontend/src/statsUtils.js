@@ -18,7 +18,8 @@ export async function loadTareas(setLoading, setChartData, setError) {
         const users = await loadUsersForTasks(tareas);
 
         const completed = tareas.filter(t => t.estadoTarea).length;
-        const pending = tareas.length - completed;
+        const wip = tareas.filter(t => !t.estadoTarea && t.fechaInicio).length;
+        const pending = tareas.length - completed - wip;
 
         const tareasBySprint = {};
         const sprintCompletionTimes = {};
@@ -212,11 +213,11 @@ export async function loadTareas(setLoading, setChartData, setError) {
 
         setChartData({
             pie: {
-                labels: ['Completadas', 'Pendientes'],
+                labels: ['Completadas', 'En Progreso', 'Pendientes'],
                 datasets: [{
-                    data: [completed, pending],
-                    backgroundColor: ['#66BB6A', '#FFA726'],
-                    borderColor: ['#43A047', '#FB8C00'],
+                    data: [completed, wip, pending],
+                    backgroundColor: ['#66BB6A', '#FFA726', '#FFCE56'],
+                    borderColor: ['#43A047', '#FB8C00', '#FFB300'],
                     borderWidth: 1,
                 }],
             },

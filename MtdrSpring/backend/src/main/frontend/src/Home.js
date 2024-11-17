@@ -464,6 +464,7 @@ function Home() {
                                         tarea={tarea}
                                         usuarios={usuarios}
                                         editingId={editingId}
+                                        newDescription={newDescription}
                                         newPoints={newPoints}
                                         newUser={newUser}
                                         newHours={newHours}
@@ -471,6 +472,7 @@ function Home() {
                                         newExpirationDate={newExpirationDate}
                                         newStartDate={newStartDate}
                                         newEndDate={newEndDate}
+                                        setNewDescription={setNewDescription}
                                         setNewPoints={setNewPoints}
                                         setNewUser={setNewUser}
                                         setNewHours={setNewHours}
@@ -505,6 +507,7 @@ function Home() {
                                             tarea={tarea}
                                             usuarios={usuarios}
                                             editingId={editingId}
+                                            newDescription={newDescription}
                                             newPoints={newPoints}
                                             newUser={newUser}
                                             newHours={newHours}
@@ -512,6 +515,7 @@ function Home() {
                                             newExpirationDate={newExpirationDate}
                                             newStartDate={newStartDate}
                                             newEndDate={newEndDate}
+                                            setNewDescription={setNewDescription}
                                             setNewPoints={setNewPoints}
                                             setNewUser={setNewUser}
                                             setNewHours={setNewHours}
@@ -547,6 +551,7 @@ function Home() {
                                         tarea={tarea}
                                         usuarios={usuarios}
                                         editingId={editingId}
+                                        newDescription={newDescription}
                                         newPoints={newPoints}
                                         newUser={newUser}
                                         newHours={newHours}
@@ -554,6 +559,7 @@ function Home() {
                                         newExpirationDate={newExpirationDate}
                                         newStartDate={newStartDate}
                                         newEndDate={newEndDate}
+                                        setNewDescription={setNewDescription}
                                         setNewPoints={setNewPoints}
                                         setNewUser={setNewUser}
                                         setNewHours={setNewHours}

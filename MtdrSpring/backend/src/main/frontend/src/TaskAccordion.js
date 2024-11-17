@@ -6,7 +6,7 @@ import TaskIcon from '@mui/icons-material/Task';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Moment from 'react-moment';
 
-function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted, markAsStarted, markAsCompleted, markAsUncompleted }) {
+function TaskAccordion({ tarea, usuarios, editingId, newDescription, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewDescription, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted, markAsStarted, markAsCompleted, markAsUncompleted }) {
     console.log('Rendering TaskAccordion:', tarea.descripcionTarea, 'isCompleted:', isCompleted, 'fechaInicio:', tarea.fechaInicio, 'fechaFin:', tarea.fechaFin);
 
     const warnings = [];
@@ -57,6 +57,31 @@ function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHour
             <AccordionDetails>
                 {editingId === tarea.idtarea ? (
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Descripción:</Typography>
+                            <TextField
+                                value={newDescription}
+                                onChange={(e) => setNewDescription(e.target.value)}
+                                InputLabelProps={{ style: { color: 'white' } }}
+                                inputProps={{ style: { color: 'white' } }}
+                                sx={{
+                                    flex: 1,
+                                    marginTop: 2,
+                                    marginBottom: 2,
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                    },
+                                }}
+                            />
+                        </div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
                             <TextField

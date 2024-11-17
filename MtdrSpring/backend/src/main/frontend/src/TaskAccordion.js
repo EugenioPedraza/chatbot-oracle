@@ -9,6 +9,27 @@ import Moment from 'react-moment';
 function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted, markAsStarted, markAsCompleted, markAsUncompleted }) {
     console.log('Rendering TaskAccordion:', tarea.descripcionTarea, 'isCompleted:', isCompleted, 'fechaInicio:', tarea.fechaInicio, 'fechaFin:', tarea.fechaFin);
 
+    const warnings = [];
+    if (isCompleted && (!tarea.fechaInicio || !tarea.fechaFin)) {
+        if (!tarea.fechaInicio) warnings.push('Marcado como completado pero sin fecha de inicio');
+        if (!tarea.fechaFin) warnings.push('Marcado como completado pero sin fecha de fin');
+    }
+    if (tarea.fechaVencimiento && tarea.fechaAsignacion && new Date(tarea.fechaVencimiento) < new Date(tarea.fechaAsignacion)) {
+        warnings.push('Fecha de vencimiento antes de la fecha de asignación');
+    }
+    if (tarea.fechaFin && tarea.fechaInicio && new Date(tarea.fechaFin) < new Date(tarea.fechaInicio)) {
+        warnings.push('Fecha de fin antes de la fecha de inicio');
+    }
+    if (tarea.fechaFin && tarea.fechaFin > tarea.sprintEndDate) {
+        warnings.push('Fecha de fin después de la fecha de fin del sprint');
+    }
+    if (tarea.fechaInicio && tarea.fechaInicio < tarea.sprintStartDate) {
+        warnings.push('Fecha de inicio antes de la fecha de inicio del sprint');
+    }
+    if (tarea.fechaAsignacion === null || tarea.fechaVencimiento === null || tarea.idusuario === null || tarea.puntos === null || tarea.horas === null) {
+        warnings.push('Campos obligatorios faltantes');
+    }
+
     return (
         <Accordion key={tarea.idtarea} sx={{ backgroundColor: isCompleted ? '#303030' : '#303030' }}>
             <AccordionSummary
@@ -19,13 +40,14 @@ function TaskAccordion({ tarea, usuarios, editingId, newPoints, newUser, newHour
                 {isCompleted ? <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} /> : <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />}
                 <Typography sx={{ color: 'white', position: 'relative' }}>
                     {tarea.descripcionTarea}
-                    {isCompleted && (!tarea.fechaInicio || !tarea.fechaFin) && (
+                    {warnings.length > 0 && (
                         <span className="tooltip-trigger" style={{ color: 'red', fontWeight: 'bold', marginLeft: '10px', cursor: 'pointer' }}>
                             !
                             <div className="tooltip">
                                 <ul style={{ margin: 0, padding: '5px', listStyleType: 'disc', fontSize: '12px', fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                                    {!tarea.fechaInicio && <li>Marcado como completado pero sin fecha de inicio</li>}
-                                    {!tarea.fechaFin && <li>Marcado como completado pero sin fecha de fin</li>}
+                                    {warnings.map((warning, index) => (
+                                        <li key={index}>{warning}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </span>

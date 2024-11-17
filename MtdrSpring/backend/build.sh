@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export IMAGE_NAME=todolistapp-springboot
-export IMAGE_VERSION=
+export IMAGE_VERSION=1
 
 
 if [ -z "$DOCKER_REGISTRY" ]; then

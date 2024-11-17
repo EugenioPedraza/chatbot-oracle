@@ -13,8 +13,7 @@ import Moment from 'react-moment'; // Importando librería para manejo de fechas
 //router stuff
 // In your Home.js, add this to import:
 import { useNavigate } from 'react-router-dom';
-
-
+import TaskAccordion from './TaskAccordion';
 
 // Componente principal de la aplicación
 function Home() {
@@ -31,12 +30,32 @@ function Home() {
     const [openNewItemDialog, setOpenNewItemDialog] = useState(false); // Estado para manejar el diálogo de agregar nueva tarea
     const [newUser, setNewUser] = useState('');
     const [newPoints, setNewPoints] = useState('');
+    const [newAssignedDate, setNewAssignedDate] = useState('');
+    const [newExpirationDate, setNewExpirationDate] = useState('');
+    const [newStartDate, setNewStartDate] = useState('');
+    const [newEndDate, setNewEndDate] = useState('');
+
 
     // Inside your Home component:
     const navigate = useNavigate();
 
-    // Función para manejar el cierre de sesión
+    // Helper function to set date at 00:00
+    function setDateAtStartOfDay(date) {
+        if (!date) return null;
+        const d = new Date(date);
+        d.setUTCHours(0, 0, 0, 0);
+        return d.toISOString();
+    }
 
+    // Helper function to set date at 23:59
+    function setDateAtEndOfDay(date) {
+        if (!date) return null;
+        const d = new Date(date);
+        d.setUTCHours(23, 59, 59, 999);
+        return d.toISOString();
+    }
+
+    // Función para manejar el cierre de sesión
     const handleLogout = async () => {
         try {
             const response = await fetch('/logout', {
@@ -67,12 +86,14 @@ function Home() {
         const sprintsAgrupados = tareas.reduce((acc, tarea) => {
             const sprint = tarea.nombreSprint;
             if (!acc[sprint]) {
-                acc[sprint] = { pendientes: [], completadas: [] }; // Inicializa el objeto con arrays de pendientes y completadas
+                acc[sprint] = { pendientes: [], enProgreso: [], completadas: [] }; // Inicializa el objeto con arrays de pendientes, en progreso y completadas
             }
             if (tarea.estadoTarea) {
                 acc[sprint].completadas.push(tarea); // Añade a completadas si la tarea está completada
+            } else if (tarea.fechaInicio) {
+                acc[sprint].enProgreso.push(tarea); // Añade a en progreso si la tarea tiene fecha de inicio
             } else {
-                acc[sprint].pendientes.push(tarea); // Añade a pendientes si la tarea no está completada
+                acc[sprint].pendientes.push(tarea); // Añade a pendientes si la tarea no está completada y no tiene fecha de inicio
             }
             return acc;
         }, {});
@@ -84,7 +105,6 @@ function Home() {
             return acc;
         }, {});
     }
-
     // Función para cargar tareas, sprints y usuarios desde la API
     function loadTareasSprintsAndUsuarios() {
         setLoading(true); // Establece isLoading a true mientras se cargan los datos
@@ -109,7 +129,6 @@ function Home() {
             setError(error.toString()); // Guarda el error en el estado
         });
     }
-
     // Función para eliminar una tarea
     function deleteTarea(id) {
         fetch(`${API_LIST}/${id}`, {
@@ -201,13 +220,17 @@ function Home() {
         });
     }
 
-    // Función para iniciar la edición de una tarea
-    function startEditTarea(id, currentDescription, currentHours, currentUser, currentPoints) {
+       // Función para iniciar la edición de una tarea
+    function startEditTarea(id, currentDescription, currentHours, currentUser, currentPoints, currentAssignedDate, currentExpirationDate, currentStartDate, currentEndDate) {
         setEditingId(id); // Establece el ID de la tarea que se está editando
         setNewDescription(currentDescription); // Establece la nueva descripción temporalmente
         setNewHours(currentHours); // Establece las nuevas horas temporalmente
         setNewUser(currentUser);
         setNewPoints(currentPoints);
+        setNewAssignedDate(currentAssignedDate.split('T')[0]); // Set the date without time
+        setNewExpirationDate(currentExpirationDate.split('T')[0]); // Set the date without time
+        setNewStartDate(currentStartDate ? currentStartDate.split('T')[0] : '');
+        setNewEndDate(currentEndDate ? currentEndDate.split('T')[0] : '');
     }
 
     // Función para guardar los cambios de una tarea editada
@@ -224,6 +247,10 @@ function Home() {
             horas: newHours,
             idusuario: newUser,
             puntos: newPoints,
+            fechaAsignacion: setDateAtStartOfDay(newAssignedDate),
+            fechaVencimiento: setDateAtEndOfDay(newExpirationDate),
+            fechaInicio: setDateAtStartOfDay(newStartDate),
+            fechaFin: setDateAtEndOfDay(newEndDate),
         };
 
         fetch(`${API_LIST}/${id}`, {
@@ -252,6 +279,135 @@ function Home() {
             setNewHours(''); // Limpia las horas temporales
             setNewUser('');
             setNewPoints('');
+            setNewAssignedDate('');
+            setNewExpirationDate('');
+            setNewStartDate('');
+            setNewEndDate('');
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.toString());
+        });
+    }
+
+    // Function to mark a task as started
+    function markAsStarted(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
+        const updatedTarea = {
+            ...currentTarea,
+            fechaInicio: new Date().toISOString()
+        };
+
+        fetch(`${API_LIST}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTarea)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
+            }
+        })
+        .then(updatedTarea => {
+            const updatedTareas = tareas.map(tarea => 
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+            );
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.toString());
+        });
+    }
+
+    // Function to mark a task as completed
+    function markAsCompleted(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
+        const updatedTarea = {
+            ...currentTarea,
+            estadoTarea: true,
+            fechaFin: new Date().toISOString()
+        };
+
+        fetch(`${API_LIST}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTarea)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
+            }
+        })
+        .then(updatedTarea => {
+            const updatedTareas = tareas.map(tarea => 
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+            );
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.toString());
+        });
+    }
+
+    // Function to mark a task as uncompleted
+    function markAsUncompleted(id) {
+        const currentTarea = tareas.find(t => t.idtarea === id);
+        if (!currentTarea) {
+            setError('Tarea no encontrada');
+            return;
+        }
+
+        const updatedTarea = {
+            ...currentTarea,
+            estadoTarea: false,
+            fechaFin: null
+        };
+
+        fetch(`${API_LIST}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTarea)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error(`Error al actualizar la tarea: ${text}`);
+                });
+            }
+        })
+        .then(updatedTarea => {
+            const updatedTareas = tareas.map(tarea => 
+                tarea.idtarea === id ? {...updatedTarea, nombreSprint: tarea.nombreSprint, nombreUsuario: tarea.nombreUsuario} : tarea
+            );
+            setTareas(updatedTareas); // Actualiza el estado de tareas con la tarea actualizada
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -286,7 +442,7 @@ function Home() {
                 style={{ marginBottom: '20px', marginLeft: '10px' }}
             >
                 Logout
-            </Button>
+            </Button> 
             <Dialog open={openNewItemDialog} onClose={() => setOpenNewItemDialog(false)}>
                 <DialogTitle>Agregar Nueva Tarea</DialogTitle>
                 <DialogContent>
@@ -303,221 +459,124 @@ function Home() {
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
                                 {tareasDelSprint.pendientes.map(tarea => (
-                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030'}}>
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                            aria-controls={`panel${tarea.idtarea}-content`}
-                                            id={`panel${tarea.idtarea}-header`}
-                                        >
-                                            <AssignmentIcon sx={{ color: '#FFA726', marginRight: 1 }} />
-                                            {editingId === tarea.idtarea ? (
-                                                <TextField 
-                                                    value={newDescription}
-                                                    onChange={(e) => setNewDescription(e.target.value)}
-                                                    label="Descripción"
-                                                    fullWidth
-                                                    InputLabelProps={{ style: { color: 'white' } }}
-                                                    inputProps={{ style: { color: 'white' } }}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                borderColor: 'white', // Color del borde
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                borderColor: 'white', // Color del borde al pasar el mouse
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                borderColor: 'white', // Color del borde al enfocar
-                                                            },
-                                                        },
-                                                    }}
-                                                />
-                                            ) : (
-                                                <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                            )}
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Typography sx={{ color: 'white' }}>
-                                                Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                                Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
-                                                Sprint: {tarea.nombreSprint}<br/>
-                                            </Typography>
-                                            {editingId === tarea.idtarea ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
-                                                            <TextField
-                                                                value={newPoints}
-                                                                onChange={(e) => setNewPoints(e.target.value)}
-                                                                InputLabelProps={{ style: { color: 'white' } }}
-                                                                inputProps={{ style: { color: 'white' } }}
-                                                                type="number"
-                                                                sx={{
-                                                                    width: '70px',
-                                                                    marginTop: 2,
-                                                                    marginBottom: 2,
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        '& fieldset': {
-                                                                            borderColor: 'white', // Color del borde
-                                                                        },
-                                                                        '&:hover fieldset': {
-                                                                            borderColor: 'white', // Color del borde al pasar el mouse
-                                                                        },
-                                                                        '&.Mui-focused fieldset': {
-                                                                            borderColor: 'white', // Color del borde al enfocar
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Usuario:</Typography>
-                                                            <FormControl sx={{ minWidth: 300 }}>
-                                                                <Select
-                                                                    value={newUser}
-                                                                    onChange={(e) => setNewUser(e.target.value)}
-                                                                    sx={{
-                                                                        color: 'white',
-                                                                        '& .MuiOutlinedInput-notchedOutline': {
-                                                                            borderColor: 'white', // Color del borde
-                                                                        },
-                                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                                            borderColor: 'white', // Color del borde al pasar el mouse
-                                                                        },
-                                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                                            borderColor: 'white', // Color del borde al enfocar
-                                                                        },
-                                                                        '& .MuiSelect-icon': {
-                                                                            color: 'white', // Color del icono desplegable
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    {usuarios.map((usuario) => (
-                                                                        <MenuItem key={usuario.idUsuario} value={usuario.idUsuario}>
-                                                                            {usuario.username}
-                                                                        </MenuItem>
-                                                                    ))}
-                                                                </Select>
-                                                            </FormControl>
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Horas:</Typography>
-                                                            <TextField
-                                                                value={newHours}
-                                                                onChange={(e) => setNewHours(e.target.value)}
-                                                                InputLabelProps={{ style: { color: 'white' } }}
-                                                                inputProps={{ style: { color: 'white' } }}
-                                                                type="number"
-                                                                sx={{
-                                                                    width: '70px',
-                                                                    marginTop: 2,
-                                                                    marginBottom: 2,
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        '& fieldset': {
-                                                                            borderColor: 'white', // Color del borde
-                                                                        },
-                                                                        '&:hover fieldset': {
-                                                                            borderColor: 'white', // Color del borde al pasar el mouse
-                                                                        },
-                                                                        '&.Mui-focused fieldset': {
-                                                                            borderColor: 'white', // Color del borde al enfocar
-                                                                        },
-                                                                    },
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <Button
-                                                            variant="contained"
-                                                            onClick={() => saveEditTarea(tarea.idtarea)}
-                                                            size="small"
-                                                        >
-                                                            Save
-                                                        </Button>
-                                                </div>
-                                            ) : (
-                                                <div>
-                                                    <Typography sx={{ color: 'white' }}>Puntos: {tarea.puntos}<br/></Typography>
-                                                    <Typography sx={{ color: 'white' }}>Usuario: {tarea.nombreUsuario}<br/></Typography>
-                                                    <Typography sx={{ color: 'white' }}>Horas: {tarea.horas}</Typography>
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={() => startEditTarea(tarea.idtarea, tarea.descripcionTarea, tarea.horas, tarea.idusuario, tarea.puntos)}
-                                                        size="small"
-                                                        sx={{ marginRight: 1, marginTop: 1 }}
-                                                    >
-                                                        Modify
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                        size="small"
-                                                        sx={{ marginTop: 1 }}
-                                                    >
-                                                        Done
-                                                    </Button>
-                                                    <Button
-                                                        startIcon={<DeleteIcon />}
-                                                        variant="contained"
-                                                        color="error"
-                                                        onClick={() => deleteTarea(tarea.idtarea)}
-                                                        size="small"
-                                                        sx={{ marginLeft: 1, marginTop: 1 }}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </AccordionDetails>
-                                    </Accordion>
+                                    <TaskAccordion
+                                        key={tarea.idtarea}
+                                        tarea={tarea}
+                                        usuarios={usuarios}
+                                        editingId={editingId}
+                                        newDescription={newDescription}
+                                        newPoints={newPoints}
+                                        newUser={newUser}
+                                        newHours={newHours}
+                                        newAssignedDate={newAssignedDate}
+                                        newExpirationDate={newExpirationDate}
+                                        newStartDate={newStartDate}
+                                        newEndDate={newEndDate}
+                                        setNewDescription={setNewDescription}
+                                        setNewPoints={setNewPoints}
+                                        setNewUser={setNewUser}
+                                        setNewHours={setNewHours}
+                                        setNewAssignedDate={setNewAssignedDate}
+                                        setNewExpirationDate={setNewExpirationDate}
+                                        setNewStartDate={setNewStartDate}
+                                        setNewEndDate={setNewEndDate}
+                                        startEditTarea={startEditTarea}
+                                        saveEditTarea={saveEditTarea}
+                                        setEditingId={setEditingId}
+                                        toggleEstado={toggleEstado}
+                                        deleteTarea={deleteTarea}
+                                        isCompleted={false}
+                                        markAsStarted={markAsStarted}
+                                        markAsCompleted={markAsCompleted}
+                                        markAsUncompleted={markAsUncompleted}
+                                    />
                                 ))}
                             </div>
                         )
                     ))}
-
+    
+                    <h2 style={{ marginTop: '30px' }}>Tareas En Progreso</h2>
+                    {Object.entries(agruparPorSprint()).some(([_, tareasDelSprint]) => tareasDelSprint.enProgreso.length > 0) ? (
+                        Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
+                            tareasDelSprint.enProgreso.length > 0 && (
+                                <div key={nombreSprint}>
+                                    <h3>{nombreSprint}</h3>
+                                    {tareasDelSprint.enProgreso.map(tarea => (
+                                        <TaskAccordion
+                                            key={tarea.idtarea}
+                                            tarea={tarea}
+                                            usuarios={usuarios}
+                                            editingId={editingId}
+                                            newDescription={newDescription}
+                                            newPoints={newPoints}
+                                            newUser={newUser}
+                                            newHours={newHours}
+                                            newAssignedDate={newAssignedDate}
+                                            newExpirationDate={newExpirationDate}
+                                            newStartDate={newStartDate}
+                                            newEndDate={newEndDate}
+                                            setNewDescription={setNewDescription}
+                                            setNewPoints={setNewPoints}
+                                            setNewUser={setNewUser}
+                                            setNewHours={setNewHours}
+                                            setNewAssignedDate={setNewAssignedDate}
+                                            setNewExpirationDate={setNewExpirationDate}
+                                            setNewStartDate={setNewStartDate}
+                                            setNewEndDate={setNewEndDate}
+                                            startEditTarea={startEditTarea}
+                                            saveEditTarea={saveEditTarea}
+                                            setEditingId={setEditingId}
+                                            toggleEstado={toggleEstado}
+                                            deleteTarea={deleteTarea}
+                                            isCompleted={false}
+                                            markAsStarted={markAsStarted}
+                                            markAsCompleted={markAsCompleted}
+                                            markAsUncompleted={markAsUncompleted}
+                                        />
+                                    ))}
+                                </div>
+                            )
+                        ))
+                    ) : (
+                        <Typography sx={{ color: 'white' }}>No hay tareas en progreso</Typography>
+                    )}
                     <h2 style={{ marginTop: '30px' }}>Tareas Completadas</h2>
                     {Object.entries(agruparPorSprint()).map(([nombreSprint, tareasDelSprint]) => (
                         tareasDelSprint.completadas.length > 0 && (
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
                                 {tareasDelSprint.completadas.map(tarea => (
-                                    <Accordion key={tarea.idtarea} sx={{ backgroundColor: '#303030' }}>
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-                                            aria-controls={`panel${tarea.idtarea}-content`}
-                                            id={`panel${tarea.idtarea}-header`}
-                                        >
-                                            <TaskIcon sx={{ color: '#66BB6A', marginRight: 1 }} />
-                                            <Typography sx={{ color: 'white' }}>{tarea.descripcionTarea}</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Typography sx={{ color: 'white' }}>
-                                                Asignado el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaAsignacion}</Moment><br/>
-                                                Vence el: <Moment format="MMM Do hh:mm:ss">{tarea.fechaVencimiento}</Moment><br/>
-                                                Sprint: {tarea.nombreSprint}<br/>
-                                                Puntos: {tarea.puntos}<br/>
-                                                Usuario: {tarea.nombreUsuario}<br/>
-                                                Horas: {tarea.horas}
-                                            </Typography>
-                                            <Button
-                                                variant="contained"
-                                                onClick={() => toggleEstado(tarea.idtarea, tarea.descripcionTarea, tarea.estadoTarea)}
-                                                size="small"
-                                                sx={{ marginRight: 1, marginTop: 1 }}
-                                            >
-                                                Undo
-                                            </Button>
-                                            <Button
-                                                startIcon={<DeleteIcon />}
-                                                variant="contained"
-                                                color="error"
-                                                onClick={() => deleteTarea(tarea.idtarea)}
-                                                size="small"
-                                                sx={{ marginTop: 1 }}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </AccordionDetails>
-                                    </Accordion>
+                                    <TaskAccordion
+                                        key={tarea.idtarea}
+                                        tarea={tarea}
+                                        usuarios={usuarios}
+                                        editingId={editingId}
+                                        newDescription={newDescription}
+                                        newPoints={newPoints}
+                                        newUser={newUser}
+                                        newHours={newHours}
+                                        newAssignedDate={newAssignedDate}
+                                        newExpirationDate={newExpirationDate}
+                                        newStartDate={newStartDate}
+                                        newEndDate={newEndDate}
+                                        setNewDescription={setNewDescription}
+                                        setNewPoints={setNewPoints}
+                                        setNewUser={setNewUser}
+                                        setNewHours={setNewHours}
+                                        setNewAssignedDate={setNewAssignedDate}
+                                        setNewExpirationDate={setNewExpirationDate}
+                                        setNewStartDate={setNewStartDate}
+                                        setNewEndDate={setNewEndDate}
+                                        startEditTarea={startEditTarea}
+                                        saveEditTarea={saveEditTarea}
+                                        setEditingId={setEditingId}
+                                        toggleEstado={toggleEstado}
+                                        deleteTarea={deleteTarea}
+                                        isCompleted={true}
+                                        markAsStarted={markAsStarted}
+                                        markAsCompleted={markAsCompleted}
+                                        markAsUncompleted={markAsUncompleted}
+                                    />
                                 ))}
                             </div>
                         )
@@ -529,3 +588,5 @@ function Home() {
 }
 
 export default Home;
+
+

@@ -41,6 +41,11 @@ public class UsuarioService {
         }
     }
 
+    public String getUsernameById(int id) {
+        Optional<Usuario> usuarioData = usuarioRepository.findById(id);
+        return usuarioData.map(Usuario::getUsername).orElse("Usuario desconocido");
+    }
+
     // Añadir a un usuario
     public Usuario addUsuario(Usuario usuario) {
         try {

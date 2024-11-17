@@ -132,3 +132,22 @@ body {
   button.DoneButton:hover {
     background-color: #D4CFCA;
   }
+
+  /* warning popup */
+  .tooltip {
+    display: none;
+    position: absolute;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 1000;
+    top: 20px;
+    left: 20px;
+    white-space: nowrap;
+}
+
+.tooltip-trigger:hover .tooltip {
+    display: block;
+}

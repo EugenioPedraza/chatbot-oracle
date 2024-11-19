@@ -523,16 +523,24 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     }
 
     private void deleteTareaById(long chatId, int tareaId) {
-        try {
-            boolean isDeleted = tareaService.deleteTarea(tareaId);
-            if (isDeleted) {
-                BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " ha sido eliminada.", this);
-            } else {
-                BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con ID " + tareaId + ".", this);
+        Integer usuarioId = chatIds.get(chatId);
+        Tarea tarea = tareaService.getTareaById(tareaId);
+
+        if(usuarioId == tarea.getIDUsuario()){
+            try {
+                boolean isDeleted = tareaService.deleteTarea(tareaId);
+                if (isDeleted) {
+                    BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " ha sido eliminada.", this);
+                } else {
+                    BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con ID " + tareaId + ".", this);
+                }
+            } catch (Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+                BotHelper.sendMessageToTelegram(chatId, "Error al eliminar la tarea. Por favor, intente de nuevo.", this);
             }
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-            BotHelper.sendMessageToTelegram(chatId, "Error al eliminar la tarea. Por favor, intente de nuevo.", this);
+        }
+        else{
+            BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " no se ha podido eliminar porque no está asignada a ti.", this);
         }
     }
 

@@ -71,8 +71,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     @PostConstruct
     public void initializeNotificationScheduler() {
         // Primer parametro es la hora, segundo el minuto, tercero cual es la notificacion que se enviará
-        scheduleNotification(16, 52, 1);
-        scheduleNotification(16, 54, 2);
+        scheduleNotification(9, 30, 1);
+        scheduleNotification(17, 0, 2);
     }
 
     @Override
@@ -166,8 +166,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         String userName = userService.getUsernameById(userId);
 
         List<Tarea> allTareas = tareaService.findAll();
+
         List<Tarea> pendingTareasForUser = allTareas.stream()
-            .filter(tarea -> tarea.getIDUsuario() == userId && !tarea.getEstadoTarea())
+            .filter(tarea -> tarea.getIDUsuario() == userId && !tarea.getEstadoTarea() && tarea.getFechaInicio() == null)
+            .collect(Collectors.toList());
+
+        List<Tarea> inProgressTareasForUser = allTareas.stream()
+            .filter(tarea -> tarea.getIDUsuario() == userId && !tarea.getEstadoTarea() && tarea.getFechaInicio() != null)
             .collect(Collectors.toList());
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -176,20 +181,30 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (pendingTareasForUser.isEmpty()) {
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
-            messageToTelegram.setText("No tienes tareas pendientes " + userName + "!");
+            messageToTelegram.setText("No tienes tareas pendientes ni en progreso " + userName + "!");
             return messageToTelegram;
         } else {
-            addDarkHeaderRow(rowsInline, "Tareas Pendientes");
-    
-            for (Tarea tarea : pendingTareasForUser) {
-                addTaskButton(rowsInline, tarea);
+            // Mostrar tareas pendientes
+            if (!pendingTareasForUser.isEmpty()) {
+                addDarkHeaderRow(rowsInline, "Tareas Pendientes");
+                for (Tarea tarea : pendingTareasForUser) {
+                    addTaskButton(rowsInline, tarea);
+                }
+            }
+
+            // Mostrar tareas en progreso
+            if (!inProgressTareasForUser.isEmpty()) {
+                addDarkHeaderRow(rowsInline, "Tareas en Progreso");
+                for (Tarea tarea : inProgressTareasForUser) {
+                    addTaskButton(rowsInline, tarea);
+                }
             }
 
             markupInline.setKeyboard(rowsInline);
     
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
-            messageToTelegram.setText("Estas son tus tareas pendientes " + userName + ":");
+            messageToTelegram.setText("Estas son tus tareas pendientes y en progreso " + userName + ":");
             messageToTelegram.setReplyMarkup(markupInline);
             return messageToTelegram;
         }
@@ -323,7 +338,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
         Map<Integer, List<Tarea>> pendingTareasBySprint = allTareas.stream()
-            .filter(tarea -> !tarea.getEstadoTarea())
+            .filter(tarea -> !tarea.getEstadoTarea() && tarea.getFechaInicio() == null)
+            .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, List<Tarea>> inProgressTareasBySprint = allTareas.stream()
+            .filter(tarea -> !tarea.getEstadoTarea() && tarea.getFechaInicio() != null)
             .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -332,6 +351,15 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         addDarkHeaderRow(rowsInline, "Tareas Pendientes");
 
         for (Map.Entry<Integer, List<Tarea>> entry : pendingTareasBySprint.entrySet()) {
+            addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
+            for (Tarea tarea : entry.getValue()) {
+                addTaskButton(rowsInline, tarea);
+            }
+        }
+
+        addDarkHeaderRow(rowsInline, "Tareas en Progreso");
+
+        for (Map.Entry<Integer, List<Tarea>> entry : inProgressTareasBySprint.entrySet()) {
             addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
             for (Tarea tarea : entry.getValue()) {
                 addTaskButton(rowsInline, tarea);

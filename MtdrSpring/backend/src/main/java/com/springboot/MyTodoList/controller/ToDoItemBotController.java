@@ -75,7 +75,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         for (Usuario usuario : usuarios) {
             chatIds.put(Long.parseLong(usuario.getPhone()), usuario.getIdUsuario());
-            System.out.println("!!!### Usuario: " + usuario.getPhone() + " - " + usuario.getIdUsuario());
         }
     }
 

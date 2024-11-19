@@ -2,20 +2,13 @@ package com.springboot.MyTodoList.controller;
 
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +20,11 @@ import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.springboot.MyTodoList.model.Tarea;
@@ -43,6 +36,12 @@ import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
 
+import javax.annotation.PostConstruct;
+import java.time.ZoneId;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.time.ZonedDateTime;
 
 @Controller
 public class ToDoItemBotController extends TelegramLongPollingBot {
@@ -53,7 +52,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private String botName;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private final Map<Long, Integer> chatIds = new ConcurrentHashMap<>();
+
+    private Map<Long, Integer> chatIds = new HashMap<>();
 
     @Autowired
     public ToDoItemBotController(@Qualifier("botToken") String botToken, @Qualifier("botName") String botName, TareaService tareaService, UsuarioService userService) {
@@ -63,19 +63,25 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         this.tareaService = tareaService;
         this.userService = userService;
         this.botName = botName;
+
+        this.chatIds = new HashMap<>();
+        List<Usuario> usuarios = userService.getAllUsuarios();
+
+        for (Usuario usuario : usuarios) {
+            try {
+                long chatId = Long.parseLong(usuario.getPhone());
+                chatIds.put(chatId, usuario.getIdUsuario());
+            } catch (NumberFormatException e) {
+                logger.warn("El teléfono del usuario con ID " + usuario.getIdUsuario() + " no es un número válido: " + usuario.getPhone());
+            }
+        }
     }
 
     @PostConstruct
     public void initializeNotificationScheduler() {
         // Primer parametro es la hora, segundo el minuto, tercero cual es la notificacion que se enviará
         scheduleNotification(9, 30, 1);
-        scheduleNotification(11, 41, 2);
-
-        List<Usuario> usuarios = userService.getAllUsuarios();
-
-        for (Usuario usuario : usuarios) {
-            chatIds.put(Long.parseLong(usuario.getPhone()), usuario.getIdUsuario());
-        }
+        scheduleNotification(17, 0, 2);
     }
 
     @Override

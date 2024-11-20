@@ -1,9 +1,12 @@
 package com.springboot.MyTodoList.controller;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -27,6 +30,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.springboot.MyTodoList.model.Tarea;
+import com.springboot.MyTodoList.model.Usuario;
 import com.springboot.MyTodoList.service.TareaService;
 import com.springboot.MyTodoList.service.UsuarioService;
 import com.springboot.MyTodoList.util.BotCommands;
@@ -36,10 +40,12 @@ import com.springboot.MyTodoList.util.BotMessages;
 
 import javax.annotation.PostConstruct;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class ToDoItemBotController extends TelegramLongPollingBot {
@@ -50,13 +56,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private String botName;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private final Map<Long, Integer> chatIds = Map.of(
-        6067521705L, 9
-        //1397467938L, 3,
-        //7251309646L, 2,
-        //6414293359L, 4,
-        //7525373544L, 1
-    );
+
+    private Map<Long, Integer> chatIds = new HashMap<>();
 
     @Autowired
     public ToDoItemBotController(@Qualifier("botToken") String botToken, @Qualifier("botName") String botName, TareaService tareaService, UsuarioService userService) {
@@ -66,13 +67,25 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         this.tareaService = tareaService;
         this.userService = userService;
         this.botName = botName;
+
+        this.chatIds = new HashMap<>();
+        List<Usuario> usuarios = userService.getAllUsuarios();
+
+        for (Usuario usuario : usuarios) {
+            try {
+                long chatId = Long.parseLong(usuario.getPhone());
+                chatIds.put(chatId, usuario.getIdUsuario());
+            } catch (NumberFormatException e) {
+                logger.warn("El teléfono del usuario con ID " + usuario.getIdUsuario() + " no es un número válido: " + usuario.getPhone());
+            }
+        }
     }
 
     @PostConstruct
     public void initializeNotificationScheduler() {
         // Primer parametro es la hora, segundo el minuto, tercero cual es la notificacion que se enviará
-        scheduleNotification(16, 52, 1);
-        scheduleNotification(16, 54, 2);
+        scheduleNotification(9, 30, 1);
+        scheduleNotification(17, 0, 2);
     }
 
     @Override
@@ -166,8 +179,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         String userName = userService.getUsernameById(userId);
 
         List<Tarea> allTareas = tareaService.findAll();
+
         List<Tarea> pendingTareasForUser = allTareas.stream()
-            .filter(tarea -> tarea.getIDUsuario() == userId && !tarea.getEstadoTarea())
+            .filter(tarea -> tarea.getIDUsuario() == userId && !tarea.getEstadoTarea() && tarea.getFechaInicio() == null)
+            .collect(Collectors.toList());
+
+        List<Tarea> inProgressTareasForUser = allTareas.stream()
+            .filter(tarea -> tarea.getIDUsuario() == userId && !tarea.getEstadoTarea() && tarea.getFechaInicio() != null)
             .collect(Collectors.toList());
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -176,20 +194,30 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (pendingTareasForUser.isEmpty()) {
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
-            messageToTelegram.setText("No tienes tareas pendientes " + userName + "!");
+            messageToTelegram.setText("No tienes tareas pendientes ni en progreso " + userName + "!");
             return messageToTelegram;
         } else {
-            addDarkHeaderRow(rowsInline, "Tareas Pendientes");
-    
-            for (Tarea tarea : pendingTareasForUser) {
-                addTaskButton(rowsInline, tarea);
+            // Mostrar tareas pendientes
+            if (!pendingTareasForUser.isEmpty()) {
+                addDarkHeaderRow(rowsInline, "Tareas Pendientes");
+                for (Tarea tarea : pendingTareasForUser) {
+                    addTaskButton(rowsInline, tarea);
+                }
+            }
+
+            // Mostrar tareas en progreso
+            if (!inProgressTareasForUser.isEmpty()) {
+                addDarkHeaderRow(rowsInline, "Tareas en Progreso");
+                for (Tarea tarea : inProgressTareasForUser) {
+                    addTaskButton(rowsInline, tarea);
+                }
             }
 
             markupInline.setKeyboard(rowsInline);
     
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
-            messageToTelegram.setText("Estas son tus tareas pendientes " + userName + ":");
+            messageToTelegram.setText("Estas son tus tareas pendientes y en progreso " + userName + ":");
             messageToTelegram.setReplyMarkup(markupInline);
             return messageToTelegram;
         }
@@ -233,9 +261,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     }
 
     private void showMainMenu(long chatId) {
+
+        Integer userId = chatIds.get(chatId);
+        String userName = userService.getUsernameById(userId);
+
         SendMessage messageToTelegram = new SendMessage();
         messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
+        messageToTelegram.setText("Hello " + userName + "! I'm MyTodoList Bot!\nType a new todo item below and press the send button (blue arrow), or select an option below:");
 
         // Configurar teclado personalizado
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
@@ -319,7 +351,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
         Map<Integer, List<Tarea>> pendingTareasBySprint = allTareas.stream()
-            .filter(tarea -> !tarea.getEstadoTarea())
+            .filter(tarea -> !tarea.getEstadoTarea() && tarea.getFechaInicio() == null)
+            .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, List<Tarea>> inProgressTareasBySprint = allTareas.stream()
+            .filter(tarea -> !tarea.getEstadoTarea() && tarea.getFechaInicio() != null)
             .collect(Collectors.groupingBy(Tarea::getIDSprint, TreeMap::new, Collectors.toList()));
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -328,6 +364,15 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         addDarkHeaderRow(rowsInline, "Tareas Pendientes");
 
         for (Map.Entry<Integer, List<Tarea>> entry : pendingTareasBySprint.entrySet()) {
+            addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
+            for (Tarea tarea : entry.getValue()) {
+                addTaskButton(rowsInline, tarea);
+            }
+        }
+
+        addDarkHeaderRow(rowsInline, "Tareas en Progreso");
+
+        for (Map.Entry<Integer, List<Tarea>> entry : inProgressTareasBySprint.entrySet()) {
             addDarkHeaderRow(rowsInline, "Sprint " + entry.getKey());
             for (Tarea tarea : entry.getValue()) {
                 addTaskButton(rowsInline, tarea);
@@ -422,8 +467,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             SendMessage messageToTelegram = new SendMessage();
             messageToTelegram.setChatId(chatId);
             messageToTelegram.setText("Por favor, ingrese la nueva tarea en el siguiente formato:\n" +
-                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, ID del Usuario, Story Points\n" +
-                    "Ejemplo: Realizar manual de usuario, 25/12/2023, 1, 2, 4");
+                    "Descripción, Fecha de Vencimiento (dd/MM/yyyy), ID del Sprint, Story Points\n" +
+                    "Ejemplo: Realizar manual de usuario, 25/12/2023, 1, 4");
             // hide keyboard
             ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
             messageToTelegram.setReplyMarkup(keyboardMarkup);
@@ -439,7 +484,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private void addNewTarea(long chatId, String messageTextFromTelegram) {
         try {
             String[] parts = messageTextFromTelegram.split(",");
-            if (parts.length != 5) {
+            if (parts.length != 4) {
                 BotHelper.sendMessageToTelegram(chatId, 
                     "No entiendo ese comando, asegúrate de usar el formato correcto.", this);
                 return;
@@ -448,11 +493,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             String descripcion = parts[0].trim();
             String fechaVencimientoStr = parts[1].trim();
             int idSprint = Integer.parseInt(parts[2].trim());
-            int idUsuario = Integer.parseInt(parts[3].trim());
-            int puntos = Integer.parseInt(parts[4].trim());
+            int puntos = Integer.parseInt(parts[3].trim());
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            Date fechaVencimiento = sdf.parse(fechaVencimientoStr);
+            Integer idUsuario = chatIds.get(chatId);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate fechaVencimientoLocalDate = LocalDate.parse(fechaVencimientoStr, formatter);
+            Date fechaVencimiento = Date.from(fechaVencimientoLocalDate
+                .atTime(LocalTime.of(23, 59))
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
 
             Tarea newTarea = new Tarea();
             newTarea.setDescripcionTarea(descripcion);
@@ -481,16 +531,24 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     }
 
     private void deleteTareaById(long chatId, int tareaId) {
-        try {
-            boolean isDeleted = tareaService.deleteTarea(tareaId);
-            if (isDeleted) {
-                BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " ha sido eliminada.", this);
-            } else {
-                BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con ID " + tareaId + ".", this);
+        Integer usuarioId = chatIds.get(chatId);
+        Tarea tarea = tareaService.getTareaById(tareaId);
+
+        if(usuarioId == tarea.getIDUsuario()){
+            try {
+                boolean isDeleted = tareaService.deleteTarea(tareaId);
+                if (isDeleted) {
+                    BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " ha sido eliminada.", this);
+                } else {
+                    BotHelper.sendMessageToTelegram(chatId, "No se encontró la tarea con ID " + tareaId + ".", this);
+                }
+            } catch (Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+                BotHelper.sendMessageToTelegram(chatId, "Error al eliminar la tarea. Por favor, intente de nuevo.", this);
             }
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-            BotHelper.sendMessageToTelegram(chatId, "Error al eliminar la tarea. Por favor, intente de nuevo.", this);
+        }
+        else{
+            BotHelper.sendMessageToTelegram(chatId, "La tarea con ID " + tareaId + " no se ha podido eliminar porque no está asignada a ti.", this);
         }
     }
 

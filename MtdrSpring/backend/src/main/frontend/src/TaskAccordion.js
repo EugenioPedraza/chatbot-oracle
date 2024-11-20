@@ -83,58 +83,6 @@ function TaskAccordion({ tarea, usuarios, editingId, newDescription, newPoints, 
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Asignación:</Typography>
-                            <TextField
-                                value={newAssignedDate}
-                                onChange={(e) => setNewAssignedDate(e.target.value)}
-                                type="date"
-                                InputLabelProps={{ style: { color: 'white' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                                sx={{
-                                    width: '200px',
-                                    marginTop: 2,
-                                    marginBottom: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                    },
-                                }}
-                            />
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Vencimiento:</Typography>
-                            <TextField
-                                value={newExpirationDate}
-                                onChange={(e) => setNewExpirationDate(e.target.value)}
-                                type="date"
-                                InputLabelProps={{ style: { color: 'white' } }}
-                                inputProps={{ style: { color: 'white' } }}
-                                sx={{
-                                    width: '200px',
-                                    marginTop: 2,
-                                    marginBottom: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'white',
-                                        },
-                                    },
-                                }}
-                            />
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
                             <Typography sx={{ color: 'white', marginRight: '5px' }}>Puntos:</Typography>
                             <TextField
                                 value={newPoints}
@@ -217,14 +165,108 @@ function TaskAccordion({ tarea, usuarios, editingId, newDescription, newPoints, 
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography sx={{ color: 'white', marginBottom: 2 }}>
-                                Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
-                            </Typography>
+                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Asignación:</Typography>
+                            <TextField
+                                value={newAssignedDate}
+                                onChange={(e) => setNewAssignedDate(e.target.value)}
+                                type="date"
+                                InputLabelProps={{ style: { color: 'white' } }}
+                                inputProps={{ style: { color: 'white' } }}
+                                sx={{
+                                    width: '200px',
+                                    marginTop: 2,
+                                    marginBottom: 2,
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                    },
+                                }}
+                            />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography sx={{ color: 'white', marginBottom: 2 }}>
-                                Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
-                            </Typography>
+                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Vencimiento:</Typography>
+                            <TextField
+                                value={newExpirationDate}
+                                onChange={(e) => setNewExpirationDate(e.target.value)}
+                                type="date"
+                                InputLabelProps={{ style: { color: 'white' } }}
+                                inputProps={{ style: { color: 'white' } }}
+                                sx={{
+                                    width: '200px',
+                                    marginTop: 2,
+                                    marginBottom: 2,
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                    },
+                                }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Inicio:</Typography>
+                            <TextField
+                                value={newStartDate}
+                                onChange={(e) => setNewStartDate(e.target.value)}
+                                type="date"
+                                InputLabelProps={{ style: { color: 'white' } }}
+                                inputProps={{ style: { color: 'white' } }}
+                                sx={{
+                                    width: '200px',
+                                    marginTop: 2,
+                                    marginBottom: 2,
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                    },
+                                }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography sx={{ color: 'white', marginRight: '5px' }}>Fecha Fin:</Typography>
+                            <TextField
+                                value={newEndDate}
+                                onChange={(e) => setNewEndDate(e.target.value)}
+                                type="date"
+                                InputLabelProps={{ style: { color: 'white' } }}
+                                inputProps={{ style: { color: 'white' } }}
+                                sx={{
+                                    width: '200px',
+                                    marginTop: 2,
+                                    marginBottom: 2,
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'white',
+                                        },
+                                    },
+                                }}
+                            />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Button

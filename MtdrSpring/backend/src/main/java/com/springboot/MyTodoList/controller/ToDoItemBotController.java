@@ -1,6 +1,8 @@
 package com.springboot.MyTodoList.controller;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,10 +40,12 @@ import com.springboot.MyTodoList.util.BotMessages;
 
 import javax.annotation.PostConstruct;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class ToDoItemBotController extends TelegramLongPollingBot {
@@ -493,8 +497,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
             Integer idUsuario = chatIds.get(chatId);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            Date fechaVencimiento = sdf.parse(fechaVencimientoStr);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate fechaVencimientoLocalDate = LocalDate.parse(fechaVencimientoStr, formatter);
+            Date fechaVencimiento = Date.from(fechaVencimientoLocalDate
+                .atTime(LocalTime.of(23, 59))
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
 
             Tarea newTarea = new Tarea();
             newTarea.setDescripcionTarea(descripcion);

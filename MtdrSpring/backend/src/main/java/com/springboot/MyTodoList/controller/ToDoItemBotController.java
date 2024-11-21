@@ -290,7 +290,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         SendMessage messageToTelegram = new SendMessage();
         messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText("Hello " + userName + "! I'm MyTodoList Bot!\nType a new todo item below and press the send button (blue arrow), or select an option below:");
+        messageToTelegram.setText("Hola  " + userName + "¡Soy el Bot MyTodoList!\nEscribe una nueva tarea a continuación y presiona el botón de enviar (flecha azul), o selecciona una opción abajo:");
 
         // Configurar teclado personalizado
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
@@ -422,13 +422,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText("Here's your organized task list. Click on a task to see details:");
+        message.setText("Aquí está tu lista de tareas organizada. Haz clic en una tarea para ver los detalles:");
         message.setReplyMarkup(markupInline);
 
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            logger.error("Error sending organized task list", e);
+            logger.error("Error al enviar la lista de tareas organizada", e);
         }
     }
 
@@ -487,8 +487,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
             execute(message);
         } catch (Exception e) {
-            logger.error("Error showing task details", e);
-            BotHelper.sendMessageToTelegram(chatId, "Error retrieving task details. Please try again.", this);
+            logger.error("Error al mostrar los detalles de la tarea", e);
+            BotHelper.sendMessageToTelegram(chatId, "Error al recuperar los detalles de la tarea. Por favor, inténtalo de nuevo.", this);
         }
     }
 
@@ -665,7 +665,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             try {
                 execute(messageToTelegram);
             } catch (TelegramApiException e) {
-                logger.error("Error sending update confirmation message", e);
+                logger.error("Error al enviar el mensaje de confirmación de actualización", e);
             }
         } else {
             SendMessage messageToTelegram = new SendMessage();
@@ -674,7 +674,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
             try {
                 execute(messageToTelegram);
             } catch (TelegramApiException e) {
-                logger.error("Error sending task not found message", e);
+                logger.error("Error al enviar el mensaje de tarea no encontrada", e);
             }
         }
     }    

@@ -6,7 +6,7 @@ import TaskIcon from '@mui/icons-material/Task';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Moment from 'react-moment';
 
-function TaskAccordion({ tarea, usuarios, editingId, newDescription, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewDescription, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted, markAsStarted, markAsCompleted, markAsUncompleted }) {
+function TaskAccordion({ tarea, aumentoProductividad, usuarios, editingId, newDescription, newPoints, newUser, newHours, newAssignedDate, newExpirationDate, newStartDate, newEndDate, setNewDescription, setNewPoints, setNewUser, setNewHours, setNewAssignedDate, setNewExpirationDate, setNewStartDate, setNewEndDate, startEditTarea, saveEditTarea, setEditingId, toggleEstado, deleteTarea, isCompleted, markAsStarted, markAsCompleted, markAsUncompleted }) {
     console.log('Rendering TaskAccordion:', tarea.descripcionTarea, 'isCompleted:', isCompleted, 'fechaInicio:', tarea.fechaInicio, 'fechaFin:', tarea.fechaFin);
 
     const warnings = [];
@@ -296,7 +296,8 @@ function TaskAccordion({ tarea, usuarios, editingId, newDescription, newPoints, 
                             Usuario: {tarea.nombreUsuario}<br/>
                             Horas: {tarea.horas}<br/>
                             Fecha Inicio: {tarea.fechaInicio ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaInicio}</Moment> : 'N/A'}<br/>
-                            Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}
+                            Fecha Fin: {tarea.fechaFin ? <Moment format="MMM Do HH:mm:ss">{tarea.fechaFin}</Moment> : 'N/A'}<br/>
+                            {isCompleted && <strong>Aumento de Productividad: {aumentoProductividad}%</strong>}
                         </Typography>
                         <Button
                             variant="contained"

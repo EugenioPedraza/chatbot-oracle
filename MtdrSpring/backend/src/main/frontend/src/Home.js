@@ -86,10 +86,15 @@ function Home() {
         const sprintsAgrupados = tareas.reduce((acc, tarea) => {
             const sprint = tarea.nombreSprint;
             if (!acc[sprint]) {
-                acc[sprint] = { pendientes: [], enProgreso: [], completadas: [] }; // Inicializa el objeto con arrays de pendientes, en progreso y completadas
+                acc[sprint] = { pendientes: [], enProgreso: [], completadas: [], totalPuntos: 0, totalProductividad: 0}; // Inicializa el objeto con arrays de pendientes, en progreso y completadas
             }
+
+            const productividadTarea = tarea.estadoTarea && tarea.horas > 0 ? ((tarea.puntos * 8 - tarea.horas) / tarea.horas) * 100 : 0;
+
             if (tarea.estadoTarea) {
                 acc[sprint].completadas.push(tarea); // Añade a completadas si la tarea está completada
+                acc[sprint].totalPuntos += tarea.puntos; // Suma los puntos de tareas completadas
+                acc[sprint].totalProductividad += productividadTarea * tarea.puntos; // Productividad ponderada por puntos
             } else if (tarea.fechaInicio) {
                 acc[sprint].enProgreso.push(tarea); // Añade a en progreso si la tarea tiene fecha de inicio
             } else {
@@ -97,6 +102,13 @@ function Home() {
             }
             return acc;
         }, {});
+
+        // Calcula la productividad total por sprint
+        for (const sprint in sprintsAgrupados) {
+            const { totalPuntos, totalProductividad } = sprintsAgrupados[sprint];
+            sprintsAgrupados[sprint].productividadSprint = totalPuntos > 0 ? (totalProductividad / totalPuntos).toFixed(2) : 0; // Evitar división por 0
+        }
+
         const sprintsOrdenados = Object.keys(sprintsAgrupados).sort((a, b) => {
             return a.localeCompare(b, undefined, { numeric: true }); // Ordena los sprints alfabéticamente
         });
@@ -105,6 +117,7 @@ function Home() {
             return acc;
         }, {});
     }
+
     // Función para cargar tareas, sprints y usuarios desde la API
     function loadTareasSprintsAndUsuarios() {
         setLoading(true); // Establece isLoading a true mientras se cargan los datos
@@ -545,10 +558,12 @@ function Home() {
                         tareasDelSprint.completadas.length > 0 && (
                             <div key={nombreSprint}>
                                 <h3>{nombreSprint}</h3>
+                                <span style={{ color: 'white', marginBottom: '5px', display: 'block'}}>Aumento de Productividad en Sprint: {tareasDelSprint.productividadSprint}%</span>
                                 {tareasDelSprint.completadas.map(tarea => (
                                     <TaskAccordion
                                         key={tarea.idtarea}
                                         tarea={tarea}
+                                        aumentoProductividad={(((tarea.puntos * 8) - tarea.horas) / tarea.horas * 100).toFixed(2)}
                                         usuarios={usuarios}
                                         editingId={editingId}
                                         newDescription={newDescription}

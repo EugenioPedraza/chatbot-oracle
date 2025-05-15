@@ -1,6 +1,9 @@
 # oci-react-samples
 A repository for full stack Cloud Native applications with a React JS frontend and various backends (Java, Python, DotNet, and so on) on the Oracle Cloud Infrastructure.
 
+Demo Video: https://drive.google.com/file/d/1MC6WGdVwP5DSYk1LFqUcUYPScugHeA2W/view
+Devops Demonstration: https://drive.google.com/file/d/1wdDXHepuerE6Wf9I_UagDIY96JePIQk6/view
+
 ![image](https://user-images.githubusercontent.com/7783295/116454396-cbfb7a00-a814-11eb-8196-ba2113858e8b.png)
   
 
